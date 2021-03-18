@@ -4,11 +4,11 @@
   "description": "Hópverkefni 1 í vefforritun 2",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon app.js",
-    "start": "node app.js",
+    "dev": "nodemon ./src/app.js",
+    "start": "node ./src/app.js",
     "eslint": "eslint *.js api authentication data utils",
     "test": "npm run eslint",
-    "setup": "node setup.js"
+    "setup": "node ./src/setup.js"
   },
   "repository": {
     "type": "git",
@@ -25,6 +25,7 @@
     "cloudinary": "^1.25.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "fs": "0.0.1-security",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "pg": "^8.5.1",
