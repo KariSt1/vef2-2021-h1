@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-unresolved
 import { readFile } from 'fs/promises';
 import { query, end } from './utils/db.js';
 import { requireEnv } from './utils/requireEnv.js';
