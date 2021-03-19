@@ -72,3 +72,27 @@ export async function deleteSeason(req, res) {
     await deleteRow([id]);
 
 }
+
+export async function newSeriesRating(req, res) {
+
+}
+
+export async function updateSeriesRating(req, res) {
+
+}
+
+export async function deleteSeriesRating(req, res) {
+
+}
+
+export async function newSeriesState(req, res) {
+
+}
+
+export async function newSeriesState(req, res) {
+
+}
+
+export async function deleteSeriesState(req, res) {
+    
+}
