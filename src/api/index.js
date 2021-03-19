@@ -120,10 +120,10 @@ router.get('/', indexRoute);
 /*
 // Series
 router.get('/tv', catchErrors(listSeries));
-router.post('/tv', requireAdmin, catchErrors(newSerie));
-router.get('/tv/:id', catchErrors(listSerie)); // Mögulega vantar að notandi geti verið loggaður inn
-router.patch('/tv/:id', requireAdmin, catchErrors(updateSerie));
-router.delete('/tv/:id', requireAdmin, catchErrors(deleteSerie));
+router.post('/tv', requireAdmin, catchErrors(newSeries));
+router.get('/tv/:id', catchErrors(listSingleSeries)); // Mögulega vantar að notandi geti verið loggaður inn
+router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
+router.delete('/tv/:id', requireAdmin, catchErrors(deleteSeries));
 router.get('/tv/:id/season', catchErrors(listSeasons));
 router.post('/tv/:id/season', requireAdmin, catchErrors(newSeason));
 router.get('/tv/:id/season/:id', catchErrors(listSeason));
