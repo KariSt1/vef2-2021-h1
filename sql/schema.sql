@@ -43,7 +43,7 @@ CREATE TABLE seasons
   created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp,
   updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp,
   tvshow_id INTEGER NOT NULL,
-  CONSTRAINT tvshow_id FOREIGN KEY (tvshow_id) REFERENCES tvshows(id),
+  CONSTRAINT tvshow_id FOREIGN KEY (tvshow_id) REFERENCES tvshows(id)
 );
 
 CREATE TABLE episodes
@@ -70,7 +70,7 @@ CREATE TABLE users
   updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp
 );
 
-CREATE TYPE stat AS ENUM ("Langar að horfa", "Er að horfa", "Hef horft");
+CREATE TYPE stat AS ENUM ('Langar að horfa', 'Er að horfa', 'Hef horft');
 
 CREATE TABLE users_tvshows
 (
