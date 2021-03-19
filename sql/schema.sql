@@ -36,21 +36,21 @@ CREATE TABLE seasons
 (
   id SERIAL PRIMARY KEY,
   name VARCHAR(256) NOT NULL,
-  nr INTEGER CHECK (nr > 0),
+  number INTEGER CHECK (number > 0),
   airDate DATE,
   description VARCHAR(256),
   image VARCHAR(256) DEFAULT NULL, 
   created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp,
   updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp,
   tvshow_id INTEGER NOT NULL,
-  CONSTRAINT tvshow_id FOREIGN KEY (tvshow_id) REFERENCES tvshows(id)
+  CONSTRAINT tvshow_id FOREIGN KEY (tvshow_id) REFERENCES tvshows(id),
 );
 
 CREATE TABLE episodes
 (
   id SERIAL PRIMARY KEY,
   name VARCHAR(256) NOT NULL,
-  nr INTEGER CHECK (nr > 0),
+  number INTEGER CHECK (number > 0),
   airDate DATE,
   description VARCHAR(256),
   created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp,
@@ -70,7 +70,7 @@ CREATE TABLE users
   updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp
 );
 
--- Tengitafla fyrir notendur og sjónvarpsþætti
+CREATE TYPE stat AS ENUM ("Langar að horfa", "Er að horfa", "Hef horft");
 
 CREATE TABLE users_tvshows
 (
@@ -78,7 +78,7 @@ CREATE TABLE users_tvshows
   tvshow_id INTEGER NOT NULL,
   CONSTRAINT user_id FOREIGN KEY (user_id) REFERENCES users(id),
   CONSTRAINT tvshow_id FOREIGN KEY (tvshow_id) REFERENCES tvshows(id),
-  status ENUM ('Langar að horfa', 'Er að horfa', 'Hef horft'),
+  status stat,
   rating INTEGER CHECK (rating >= 0 AND rating <= 5)
 );
 
