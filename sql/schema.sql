@@ -72,8 +72,6 @@ CREATE TABLE users
   updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp
 );
 
--- Tengitafla fyrir notendur og sjónvarpsþætti
-
 CREATE TABLE users-tvshows
 (
   user_id INTEGER NOT NULL,
