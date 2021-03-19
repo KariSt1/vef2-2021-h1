@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import { requireEnv } from './utils/requireEnv.js';
 import { router } from './api/index.js';
+import { userRouter } from './authentication/auth.js';
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ function errorHandler(err, req, res, next) { // eslint-disable-line
 
 app.use(notFoundHandler);
 app.use(errorHandler);
+app.use(userRouter);
 
 app.listen(port, () => {
   console.info(`Server running at http://localhost:${port}/`);
