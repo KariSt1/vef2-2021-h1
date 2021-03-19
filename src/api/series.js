@@ -1,21 +1,22 @@
 import { query, pagedQuery } from '../utils/db.js';
+import { addPageMetadata } from '../utils/addPageMetadata.js';
 
-async function listSeries(req, res) {
+export async function listSeries(req, res) {
   const { offset = 0, limit = 10 } = req.query;
 
-  const categories = await pagedQuery(
-    'SELECT id, title FROM series ORDER BY updated DESC',
+  const series = await pagedQuery(
+    'SELECT * FROM tvshows ORDER BY id DESC',
     [],
     { offset, limit },
   );
 
-  const categoriesWithPage = addPageMetadata(
-    categories,
+  const seriesWithPage = addPageMetadata(
+    series,
     req.path,
-    { offset, limit, length: categories.items.length },
+    { offset, limit, length: series.items.length },
   );
 
-  return res.json(categoriesWithPage);
+  return res.json(seriesWithPage);
 }
 
 async function newSeries(req, res) {

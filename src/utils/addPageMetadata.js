@@ -1,4 +1,4 @@
-import { toPositiveNumberOrDefault } from './validation';
+import { toPositiveNumberOrDefault } from './validation.js';
 
 const {
   PORT: port = 3000,
