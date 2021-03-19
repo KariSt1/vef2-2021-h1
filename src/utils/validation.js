@@ -14,15 +14,12 @@ export function isBoolean(b) {
   return typeof b === 'boolean';
 }
 
-export function lengthValidationError(s, min, max) {
-  const length = s && s.length ? s.length : 'undefined';
+export function lengthValidationError(min, max) {
+  if ( min != null) {
+    return `min ${min} characters, max ${max} characters`
+  }
+  return `max ${max} characters`;
 
-  const minMsg = min ? `at least ${min} characters` : '';
-  const maxMsg = max ? `at most ${max} characters` : '';
-  const msg = [minMsg, maxMsg].filter(Boolean).join(', ');
-  const lenMsg = `Current length is ${length}.`;
-
-  return `Must be non empty string ${msg}. ${lenMsg}`;
 }
 
 export function isNotEmptyString(s, { min = undefined, max = undefined } = {}) {
