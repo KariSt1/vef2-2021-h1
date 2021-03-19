@@ -1,6 +1,7 @@
 import pg from 'pg';
 import dotenv from 'dotenv';
 import { toPositiveNumberOrDefault } from './validation.js';
+import debug from './debug.js';
 
 dotenv.config();
 
@@ -95,12 +96,12 @@ export async function insert({
 }
 
 export async function conditionalUpdate(table, id, fields, values) {
-  const filteredFields = fields.filter(i => typeof i === 'string');
+  const filteredFields = fields.filter((i) => typeof i === 'string');
   const filteredValues = values
     .filter(
-      i => typeof i === 'string' ||
-      typeof i === 'number' ||
-      i instanceof Date,
+      (i) => typeof i === 'string'
+      || typeof i === 'number'
+      || i instanceof Date,
     );
 
   if (filteredFields.length === 0) {
