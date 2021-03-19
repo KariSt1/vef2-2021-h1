@@ -7,7 +7,7 @@ CREATE TABLE tvshows
   inProduction BOOLEAN,
   tagline VARCHAR(256),
   image VARCHAR(256) NOT NULL, 
-  description VARCHAR(256),
+  description VARCHAR(1024),
   language VARCHAR(256) NOT NULL,
   network VARCHAR(256),
   homepage VARCHAR(256),
