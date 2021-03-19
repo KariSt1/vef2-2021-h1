@@ -28,7 +28,7 @@ export async function listSeries(req, res) {
   const { offset = 0, limit = 10 } = req.query;
 
   const series = await pagedQuery(
-    'SELECT * FROM tvshows ORDER BY id ASC',
+    'SELECT id,name,airDate,inProduction,tagline,image,description,language,network,homepage FROM tvshows ORDER BY id ASC',
     [],
     { offset, limit },
   );
