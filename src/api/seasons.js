@@ -1,11 +1,16 @@
 import { query, pagedQuery } from '../utils/db.js';
-import { isBoolean } from '../utils/validation.js';
 import addPageMetadata from '../utils/addPageMetadata.js';
 
 async function findById(id) {
     if (!isInt(id)) {
       return null;
     }
+  }
+
+async function deleteRow(id) {
+    const q = 'DELETE FROM seasons WHERE id = $1';
+  
+    return query(q, id);
   }
 
 export async function listSeasons(req, res) {
@@ -36,16 +41,19 @@ export async function listSeason(req, res) {
     const season = await findById(id);
   
     if (!season) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: 'Season not found' });
     }
   
     return res.json(season);
   }
 
-export async function newSeason() {
+export async function newSeason(req, res) {
 
 }
 
-export async function deleteSeason() {
+export async function deleteSeason(req, res) {
+    const { id } = req.params;
+
+    await deleteRow([id]);
 
 }
