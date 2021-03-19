@@ -24,6 +24,16 @@ async function newSeries(req, res) {
 }
 
 async function listSingleSeries(req, res) {
+  const { id } = req.params;
+  
+  const singleSeries = await findById(id);
+
+  if (!singleSeries) {
+    return res.status(404).json({ error: 'Series not found' });
+  }
+
+  return res.json(singleSeries);
+}
 
 }
 
