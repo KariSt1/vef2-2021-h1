@@ -19,8 +19,8 @@ import catchErrors from '../utils/catchErrors.js';
 
 dotenv.config();
 
-export const userRouter = express.Router();
-userRouter.use(express.json);
+export const app = express();
+app.use(express.json());
 
 const defaultTokenLifetime = 60 * 60 * 24 * 7; // 7 dagar
 
@@ -51,7 +51,7 @@ async function strat(data, next) {
 
 passport.use(new Strategy(jwtOptions, strat));
 
-userRouter.use(passport.initialize());
+app.use(passport.initialize());
 
 export function requireAuth(req, res, next) {
   return passport.authenticate(
@@ -149,5 +149,5 @@ async function loginRoute(req, res) {
   return res.status(401).json({ error: 'Invalid password' });
 }
 
-userRouter.post('/users/register', catchErrors(registerRoute));
-userRouter.post('/users/login', catchErrors(loginRoute));
+app.post('/users/register', catchErrors(registerRoute));
+app.post('/users/login', catchErrors(loginRoute));
