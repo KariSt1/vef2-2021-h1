@@ -149,5 +149,6 @@ async function loginRoute(req, res) {
   return res.status(401).json({ error: 'Invalid password' });
 }
 
+
 app.post('/users/register', catchErrors(registerRoute));
 app.post('/users/login', catchErrors(loginRoute));

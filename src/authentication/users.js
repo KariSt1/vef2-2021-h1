@@ -60,8 +60,9 @@ export async function validateUser(
   if (!patching) {
     if (!isNotEmptyString(username, { min: 3, max: 32 })) {
       validations.push({
-        field: 'username',
-        error: lengthValidationError(username, 3, 32),
+        msg: 'username is required, ' + lengthValidationError(username, 3, 32),
+        param: 'username',
+        location: 'body',
       });
     }
 
@@ -74,16 +75,7 @@ export async function validateUser(
       });
     }
   }
-
-  if (!patching || password || isEmpty(password)) {
-    if (!isNotEmptyString(password, { min: 8 })) {
-      validations.push({
-        field: 'password',
-        error: lengthValidationError(password, 8),
-      });
-    }
-  }
-
+  
   if (!patching || email || isEmpty(email)) {
     if (!isNotEmptyString(email, { min: 1, max: 64 })) {
       validations.push({
@@ -105,6 +97,15 @@ export async function validateUser(
           error: 'Email exists',
         });
       }
+    }
+  }
+
+  if (!patching || password || isEmpty(password)) {
+    if (!isNotEmptyString(password, { min: 8 })) {
+      validations.push({
+        field: 'password',
+        error: lengthValidationError(password, 8),
+      });
     }
   }
 

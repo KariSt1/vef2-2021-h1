@@ -4,7 +4,7 @@ import {
     findById,
   } from '../authentication/users.js';
   
-  import { query } from '../utils/db.js';
+  import { query, pagedQuery } from '../utils/db.js';
   import { isBoolean } from '../utils/validation.js';
   import addPageMetadata from '../utils/addPageMetadata.js';
 
