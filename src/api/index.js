@@ -1,5 +1,7 @@
 import express from 'express';
 import { listSeries, listSingleSeries } from './series.js';
+import { listSeason, listSeasons } from './seasons.js';
+import { listEpisode } from './episode.js';
 import catchErrors from '../utils/catchErrors.js';
 
 export const router = express.Router();
@@ -120,17 +122,19 @@ router.get('/', indexRoute);
 
 router.get('/tv', catchErrors(listSeries));
 router.get('/tv/:id', catchErrors(listSingleSeries));
+
+router.get('/tv/:id/season', catchErrors(listSeasons));
+router.get('/tv/:id/season/:id', catchErrors(listSeason));
+
+router.get('/tv/:id/season/:id/episode/:id', catchErrors(listEpisode));
 /*
 // Series
 router.post('/tv', requireAdmin, catchErrors(newSeries));
 router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
 router.delete('/tv/:id', requireAdmin, catchErrors(deleteSeries));
-router.get('/tv/:id/season', catchErrors(listSeasons));
 router.post('/tv/:id/season', requireAdmin, catchErrors(newSeason));
-router.get('/tv/:id/season/:id', catchErrors(listSeason));
 router.delete('/tv/:id/season/:id', requireAdmin, catchErrors(deleteSeason));
 router.post('/tv/:id/season/:id/episode', requireAdmin, catchErrors(newEpisode));
-router.get('/tv/:id/season/:id/episode/:id', catchErrors(listEpisode));
 router.delete('/tv/:id/season/:id/episode/:id', requireAdmin, catchErrors(deleteEpisode));
 router.get('/genres', catchErrors(listGenres));
 router.post(/genres', requireAdmin, catchErrors(newGenre));

@@ -2,7 +2,7 @@ import { query, pagedQuery } from '../utils/db.js';
 import { addPageMetadata } from '../utils/addPageMetadata.js';
 import { isInt } from '../utils/validation.js';
 
-export async function findById(id) {
+async function findById(id) {
   if (!isInt(id)) {
     return null;
   }
@@ -63,5 +63,9 @@ export async function updateSeries(req, res) {
 }
 
 export async function deleteSeries(req, res) {
+  const { id } = req.params;
 
+  const q = 'DELETE FROM seasons WHERE id = $1';
+
+  await query(q, [id]);
 }
