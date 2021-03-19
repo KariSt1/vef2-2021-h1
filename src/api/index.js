@@ -1,5 +1,5 @@
 import express from 'express';
-import { listSeries } from './series.js';
+import { listSeries, listSingleSeries } from './series.js';
 import catchErrors from '../utils/catchErrors.js';
 
 export const router = express.Router();
@@ -119,10 +119,10 @@ function indexRoute(req, res) {
 router.get('/', indexRoute);
 
 router.get('/tv', catchErrors(listSeries));
+router.get('/tv/:id', catchErrors(listSingleSeries));
 /*
 // Series
 router.post('/tv', requireAdmin, catchErrors(newSeries));
-router.get('/tv/:id', catchErrors(listSingleSeries)); // Mögulega vantar að notandi geti verið loggaður inn
 router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
 router.delete('/tv/:id', requireAdmin, catchErrors(deleteSeries));
 router.get('/tv/:id/season', catchErrors(listSeasons));
