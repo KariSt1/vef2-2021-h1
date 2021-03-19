@@ -138,8 +138,6 @@ router.post(/genres', requireAdmin, catchErrors(newGenre));
 router.get('/users', requireAdmin, catchErrors(listUsers));
 router.get('/users/:id', requireAdmin, catchErrors(listUser));
 router.patch('/users/:id', requireAdmin, catchErrors(updateUser));
-router.post('/users/register', catchErrors(newUser));
-router.post('/users/login', catchErrors(loginUser));
 router.get('/users/me', requireAuth, catchErrors(currentUser));
 router.patch('/users/me', requireAuth, catchErrors(updateCurrentUser));
 

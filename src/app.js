@@ -2,6 +2,8 @@ import dotenv from 'dotenv';
 import express from 'express';
 import { requireEnv } from './utils/requireEnv.js';
 import { router } from './api/index.js';
+import { app as userRouter } from './authentication/auth.js';
+import { cors } from './utils/cors.js'
 
 dotenv.config();
 
@@ -19,11 +21,13 @@ if (!connectionString || !jwtSecret) {
 }
 
 const app = express();
+app.use(express.json());
 
-// Sér um að req.body innihaldi gögn úr formi
-app.use(express.urlencoded({ extended: true }));
+app.use(cors);
 
+app.use(userRouter);
 app.use('/', router);
+
 function notFoundHandler(req, res, next) { // eslint-disable-line
   console.warn('Not found', req.originalUrl);
   res.status(404).json({ error: 'Not found' });
