@@ -29,10 +29,8 @@ pool.on('error', (err) => {
  */
 export async function query(_query, values = []) {
   const client = await pool.connect();
-  console.log('Values í query: ', values);
   try {
     const result = await client.query(_query, values);
-    console.log('Query result: ', result.rows);
     return result;
   } finally {
     client.release();
