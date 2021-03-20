@@ -43,7 +43,6 @@ CREATE TABLE seasons
   updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp,
   serie VARCHAR(256) NOT NULL,
   serie_id INTEGER NOT NULL,
-  CONSTRAINT serie FOREIGN KEY (serie) REFERENCES tvshows(name),
   CONSTRAINT serie_id FOREIGN KEY (serie_id) REFERENCES tvshows(id)
 );
 
@@ -53,7 +52,7 @@ CREATE TABLE episodes
   name VARCHAR(256) NOT NULL,
   number INTEGER CHECK (number > 0),
   air_date DATE,
-  overview VARCHAR(256),
+  overview VARCHAR(2048),
   created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp,
   updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp,
   season_id INTEGER NOT NULL,
