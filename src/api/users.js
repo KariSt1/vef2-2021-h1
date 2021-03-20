@@ -6,7 +6,7 @@ import {
   
   import { query, pagedQuery } from '../utils/db.js';
   import { isBoolean } from '../utils/validation.js';
-  import addPageMetadata from '../utils/addPageMetadata.js';
+  import { addPageMetadata } from '../utils/addPageMetadata.js';
 
 export async function listUsers(req, res) {
   const { offset = 0, limit = 10 } = req.query;

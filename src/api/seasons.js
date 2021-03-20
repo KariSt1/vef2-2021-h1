@@ -89,7 +89,7 @@ export async function newSeriesState(req, res) {
 
 }
 
-export async function newSeriesState(req, res) {
+export async function updateSeriesState(req, res) {
 
 }
 
