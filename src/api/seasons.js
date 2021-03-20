@@ -1,10 +1,25 @@
 import { query, pagedQuery } from '../utils/db.js';
-import addPageMetadata from '../utils/addPageMetadata.js';
+import { addPageMetadata } from '../utils/addPageMetadata.js';
 
 async function findById(id) {
     if (!isInt(id)) {
       return null;
     }
+  
+    const seasons = await query(
+      `SELECT
+        id,name,airDate,description,image
+      FROM
+        seasons
+      WHERE id = $1`,
+      [id],
+    );
+  
+    if (seasons.rows.length !== 1) {
+      return null;
+    }
+  
+    return seasons.rows[0];
   }
 
 async function deleteRow(id) {
@@ -27,7 +42,7 @@ export async function listSeasons(req, res) {
       );
 
     const seasonsWithPage = addPageMetadata(
-        series,
+        seasons,
         req.path,
         { offset, limit, length: seasons.items.length },
       );
@@ -56,4 +71,28 @@ export async function deleteSeason(req, res) {
 
     await deleteRow([id]);
 
+}
+
+export async function newSeriesRating(req, res) {
+
+}
+
+export async function updateSeriesRating(req, res) {
+
+}
+
+export async function deleteSeriesRating(req, res) {
+
+}
+
+export async function newSeriesState(req, res) {
+
+}
+
+export async function updateSeriesState(req, res) {
+
+}
+
+export async function deleteSeriesState(req, res) {
+    
 }

@@ -1,5 +1,22 @@
 import express from 'express';
-import { listSeries } from './series.js';
+import { listSeries, listSingleSeries } from './series.js';
+import { listSeason, listSeasons } from './seasons.js';
+import { listEpisode } from './episode.js';
+import { listGenres } from './genres.js';
+import { 
+      listUsers, 
+      listUser,
+      updateUserRoute as updateUser,
+      currentUser,
+      updateCurrentUser
+} from './users.js';
+import { requireAuth, checkUserIsAdmin } from '../authentication/auth.js';
+
+const requireAdmin = [
+  requireAuth,
+  checkUserIsAdmin,
+];
+
 import catchErrors from '../utils/catchErrors.js';
 
 export const router = express.Router();
@@ -119,28 +136,33 @@ function indexRoute(req, res) {
 router.get('/', indexRoute);
 
 router.get('/tv', catchErrors(listSeries));
-/*
-// Series
-router.post('/tv', requireAdmin, catchErrors(newSeries));
-router.get('/tv/:id', catchErrors(listSingleSeries)); // Mögulega vantar að notandi geti verið loggaður inn
-router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
-router.delete('/tv/:id', requireAdmin, catchErrors(deleteSeries));
-router.get('/tv/:id/season', catchErrors(listSeasons));
-router.post('/tv/:id/season', requireAdmin, catchErrors(newSeason));
-router.get('/tv/:id/season/:id', catchErrors(listSeason));
-router.delete('/tv/:id/season/:id', requireAdmin, catchErrors(deleteSeason));
-router.post('/tv/:id/season/:id/episode', requireAdmin, catchErrors(newEpisode));
-router.get('/tv/:id/season/:id/episode/:id', catchErrors(listEpisode));
-router.delete('/tv/:id/season/:id/episode/:id', requireAdmin, catchErrors(deleteEpisode));
-router.get('/genres', catchErrors(listGenres));
-router.post(/genres', requireAdmin, catchErrors(newGenre));
+router.get('/tv/:id', catchErrors(listSingleSeries));
 
-// Users
+router.get('/tv/:id/season', catchErrors(listSeasons));
+router.get('/tv/:id/season/:id', catchErrors(listSeason));
+
+router.get('/tv/:id/season/:id/episode/:id', catchErrors(listEpisode));
+
+router.get('/genres', catchErrors(listGenres));
+
 router.get('/users', requireAdmin, catchErrors(listUsers));
 router.get('/users/:id', requireAdmin, catchErrors(listUser));
 router.patch('/users/:id', requireAdmin, catchErrors(updateUser));
+//Fæ forbidden þótt ég sé logguð inn sé ekki afhverju
 router.get('/users/me', requireAuth, catchErrors(currentUser));
 router.patch('/users/me', requireAuth, catchErrors(updateCurrentUser));
+
+/*
+// Series
+router.post('/tv', requireAdmin, catchErrors(newSeries));
+router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
+router.delete('/tv/:id', requireAdmin, catchErrors(deleteSeries));
+router.post('/tv/:id/season', requireAdmin, catchErrors(newSeason));
+router.delete('/tv/:id/season/:id', requireAdmin, catchErrors(deleteSeason));
+router.post('/tv/:id/season/:id/episode', requireAdmin, catchErrors(newEpisode));
+router.delete('/tv/:id/season/:id/episode/:id', requireAdmin, catchErrors(deleteEpisode));
+router.post(/genres', requireAdmin, catchErrors(newGenre));
+
 
 // Series and users
 router.post('/tv/:id/rate', requireAuth, catchErrors(newSeriesRating));
