@@ -29,9 +29,10 @@ pool.on('error', (err) => {
  */
 export async function query(_query, values = []) {
   const client = await pool.connect();
-
+  console.log('Values í query: ', values);
   try {
     const result = await client.query(_query, values);
+    console.log('Query result: ', result.rows);
     return result;
   } finally {
     client.release();
@@ -72,23 +73,21 @@ export async function pagedQuery(
  * @param {boolean} entry.anonymous – If the registrants name should be displayed or not
  * @returns {Promise<boolean>} Promise, resolved as true if inserted, otherwise false
  */
-export async function insert({
-  name, nationalId, comment, anonymous,
-} = {}) {
+export async function insertGenre(name) {
   let success = true;
 
   const q = `
-    INSERT INTO signatures
-      (name, nationalId, comment, anonymous)
-    VALUES
-      ($1, $2, $3, $4);
+    INSERT INTO genres (name)
+    SELECT CAST($1 AS VARCHAR) WHERE NOT EXISTS (
+      SELECT name FROM GENRES WHERE name LIKE $1
+    );
   `;
-  const values = [name, nationalId, comment, anonymous === 'on'];
+  const values = { name };
 
   try {
-    await query(q, values);
+    await query(q, [name]);
   } catch (e) {
-    console.error('Error inserting signature', e);
+    console.error('Error inserting genre', e);
     success = false;
   }
 

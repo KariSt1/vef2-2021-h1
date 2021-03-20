@@ -17,8 +17,7 @@ CREATE TABLE tvshows
 
 CREATE TABLE genres
 (
-  id SERIAL PRIMARY KEY, 
-  name VARCHAR(256) NOT NULL ,
+  name VARCHAR(256) NOT NULL PRIMARY KEY,
   created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp,
   updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp
 );
@@ -26,10 +25,10 @@ CREATE TABLE genres
 
 CREATE TABLE tvshows_genres
 (
-  tvshow_id INTEGER REFERENCES tvshows(id) NOT NULL,
-  genre_id INTEGER REFERENCES genres(id) NOT NULL,
+  tvshow_id INTEGER NOT NULL,
+  genre_name VARCHAR(256) NOT NULL,
   CONSTRAINT tvshow_id FOREIGN KEY (tvshow_id) REFERENCES tvshows(id),
-  CONSTRAINT genre_id FOREIGN KEY (genre_id) REFERENCES genres(id)
+  CONSTRAINT genre_name FOREIGN KEY (genre_name) REFERENCES genres(name)
 );
 
 CREATE TABLE seasons
