@@ -6,7 +6,7 @@ export async function listGenres(req, res) {
 
     const genres = await pagedQuery(
         `SELECT
-          *
+          name
         FROM
           genres
         ORDER BY id`,
