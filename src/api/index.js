@@ -135,6 +135,13 @@ function indexRoute(req, res) {
 
 router.get('/', indexRoute);
 
+router.get('/users', requireAdmin, catchErrors(listUsers));
+router.get('/users/:id', requireAdmin, catchErrors(listUser));
+router.patch('/users/:id', requireAdmin, catchErrors(updateUser));
+//Fæ forbidden þótt ég sé logguð inn sé ekki afhverju
+router.get('/users/me', requireAuth, catchErrors(currentUser));
+router.patch('/users/me', requireAuth, catchErrors(updateCurrentUser));
+
 router.get('/tv', catchErrors(listSeries));
 router.get('/tv/:id', catchErrors(listSingleSeries));
 
@@ -145,12 +152,6 @@ router.get('/tv/:id/season/:id/episode/:id', catchErrors(listEpisode));
 
 router.get('/genres', catchErrors(listGenres));
 
-router.get('/users', requireAdmin, catchErrors(listUsers));
-router.get('/users/:id', requireAdmin, catchErrors(listUser));
-router.patch('/users/:id', requireAdmin, catchErrors(updateUser));
-//Fæ forbidden þótt ég sé logguð inn sé ekki afhverju
-router.get('/users/me', requireAuth, catchErrors(currentUser));
-router.patch('/users/me', requireAuth, catchErrors(updateCurrentUser));
 
 /*
 // Series

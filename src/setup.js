@@ -24,23 +24,20 @@ function insertSeries() {
 
       const seriesQuery = 'INSERT INTO tvshows (id, name, air_date, inProduction, tagline, image, description, language, network, homepage) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)';
       const linkQuery = 'INSERT INTO tvshows_genres (tvshow_id, genre_name) VALUES ($1, $2)';
+      
 
       csvData.forEach(async (row) => {
         const seriesID = row[0];
         const genres = row[3].split(',');
         row.splice(3, 1);
+        genres.forEach(async (genre) => {
         try {
           await query(seriesQuery, row);
+          await insertGenre(genre);
+          await query(linkQuery, [seriesID, genre]);
         } catch (e) {
           console.error(e);
         }
-        genres.forEach(async (genre) => {
-          try {
-            await insertGenre(genre);
-            await query(linkQuery, [seriesID, genre]);
-          } catch (e) {
-            console.error(e);
-          }
         });
       });
     });
@@ -60,11 +57,19 @@ function insertSeasons() {
       // remove the first line: header
       csvData.shift();
 
-      const seasonQuery = 'INSERT INTO seasons (name,number,air_date,overview,poster,serie,serieId) VALUES ($1, $2, $3, $4, $5, $6, $7)';
+      const seasonQuery = 'INSERT INTO seasons (name,number,air_date,overview,poster,serie,serie_id) VALUES ($1, $2, $3, $4, $5, $6, $7)';
+      const seasonQueryEmptyDate = 'INSERT INTO seasons (name,number,overview,poster,serie,serie_id) VALUES ($1, $2, $3, $4, $5, $6)';
 
       csvData.forEach(async (row) => {
         try {
-          await query(seasonQuery, row);
+          if(row[2] === "") {
+            row.splice(2, 1);
+            await query(seasonQueryEmptyDate, row);
+          }
+          else {
+            await query(seasonQuery, row);
+          }
+          console.log(row);
         } catch (e) {
           console.error(e);
         }
@@ -73,6 +78,8 @@ function insertSeasons() {
 
   stream.pipe(csvStream);
 }
+
+
 
 async function create() {
   const dropTables = await readFile(dropTablesFile);

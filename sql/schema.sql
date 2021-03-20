@@ -2,8 +2,8 @@
 CREATE TABLE tvshows
 (
   id SERIAL PRIMARY KEY, 
-  name VARCHAR(256) NOT NULL,
-  airDate DATE,
+  name VARCHAR(256) NOT NULL UNIQUE,
+  air_date DATE,
   inProduction BOOLEAN,
   tagline VARCHAR(256),
   image VARCHAR(256) NOT NULL, 
@@ -37,12 +37,14 @@ CREATE TABLE seasons
   name VARCHAR(256) NOT NULL,
   number INTEGER CHECK (number > 0),
   air_date DATE,
-  overview VARCHAR(256),
+  overview VARCHAR(2048),
   poster VARCHAR(256) DEFAULT NULL, 
   created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp,
   updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp,
-  tvshow_id INTEGER NOT NULL,
-  CONSTRAINT tvshow_id FOREIGN KEY (tvshow_id) REFERENCES tvshows(id)
+  serie VARCHAR(256) NOT NULL,
+  serie_id INTEGER NOT NULL,
+  CONSTRAINT serie FOREIGN KEY (serie) REFERENCES tvshows(name),
+  CONSTRAINT serie_id FOREIGN KEY (serie_id) REFERENCES tvshows(id)
 );
 
 CREATE TABLE episodes

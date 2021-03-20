@@ -8,8 +8,7 @@ export async function listGenres(req, res) {
         `SELECT
           name
         FROM
-          genres
-        ORDER BY id`,
+          genres `,
         [],
         { offset, limit },
       );
