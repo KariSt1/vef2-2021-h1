@@ -1,18 +1,18 @@
 import { query, pagedQuery } from '../utils/db.js';
 import { isInt } from '../utils/validation.js';
 
-async function findById(id) {
-    if (!isInt(id)) {
+async function findEpisode(serie_id,season_number,episode_number) {
+    if (!isInt(serie_id) && !isInt(season_number) && !isInt(episode_number)) {
       return null;
     }
   
     const episode = await query(
       `SELECT
-        id,name,number,airDate,description,season_id
+        id,name,number,air_date,overview,serie_id,season,season_id
       FROM
         episodes
-      WHERE id = $1`,
-      [id],
+      WHERE serie_id = $1 AND season = $2 AND number = $3`,
+      [serie_id,season_number,episode_number],
     );
   
     if (episode.rows.length !== 1) {
@@ -24,9 +24,9 @@ async function findById(id) {
   
 
 export async function listEpisode(req, res) {
-    const { id } = req.params;
+    const { serie_id,season_number, episode_number } = req.params;
   
-    const episode = await findById(id);
+    const episode = await findEpisode(serie_id,season_number,episode_number);
   
     if (!episode) {
       return res.status(404).json({ error: 'Episode not found' });
