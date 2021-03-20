@@ -9,7 +9,7 @@ async function findById(id) {
 
   const series = await query(
     `SELECT
-      id,name,airDate,inProduction,tagline,image,
+      id,name,air_date,inProduction,tagline,image,
       description,language,network,homepage
     FROM
       tvshows
@@ -28,7 +28,7 @@ export async function listSeries(req, res) {
   const { offset = 0, limit = 10 } = req.query;
 
   const series = await pagedQuery(
-    'SELECT id,name,airDate,inProduction,tagline,image,description,language,network,homepage FROM tvshows ORDER BY id ASC',
+    'SELECT id,name,air_date,inProduction,tagline,image,description,language,network,homepage FROM tvshows ORDER BY id ASC',
     [],
     { offset, limit },
   );

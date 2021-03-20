@@ -145,9 +145,11 @@ router.patch('/users/me', requireAuth, catchErrors(updateCurrentUser));
 router.get('/tv', catchErrors(listSeries));
 router.get('/tv/:id', catchErrors(listSingleSeries));
 
+//tengja serie_id í seasons.js til að þetta virki
 router.get('/tv/:id/season', catchErrors(listSeasons));
-router.get('/tv/:id/season/:id', catchErrors(listSeason));
+router.get('/tv/:id/season/:number', catchErrors(listSeason));
 
+//tengja öll id-in við í episode.js
 router.get('/tv/:id/season/:id/episode/:id', catchErrors(listEpisode));
 
 router.get('/genres', catchErrors(listGenres));
@@ -160,6 +162,7 @@ router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
 router.delete('/tv/:id', requireAdmin, catchErrors(deleteSeries));
 router.post('/tv/:id/season', requireAdmin, catchErrors(newSeason));
 router.delete('/tv/:id/season/:id', requireAdmin, catchErrors(deleteSeason));
+router.get('/tv/:id/season/:id/episode, catchErrors(listEpisodes));
 router.post('/tv/:id/season/:id/episode', requireAdmin, catchErrors(newEpisode));
 router.delete('/tv/:id/season/:id/episode/:id', requireAdmin, catchErrors(deleteEpisode));
 router.post(/genres', requireAdmin, catchErrors(newGenre));
