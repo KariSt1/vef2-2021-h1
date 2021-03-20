@@ -3,6 +3,19 @@ import { listSeries, listSingleSeries } from './series.js';
 import { listSeason, listSeasons } from './seasons.js';
 import { listEpisode } from './episode.js';
 import { listGenres } from './genres.js';
+import { 
+      listUsers, 
+      listUser,
+      updateUserRoute as updateUser,
+      currentUser,
+      updateCurrentUser
+} from './users.js';
+import { requireAuth, checkUserIsAdmin } from '../authentication/auth.js';
+
+const requireAdmin = [
+  requireAuth,
+  checkUserIsAdmin,
+];
 
 import catchErrors from '../utils/catchErrors.js';
 
@@ -132,6 +145,12 @@ router.get('/tv/:id/season/:id/episode/:id', catchErrors(listEpisode));
 
 router.get('/genres', catchErrors(listGenres));
 
+router.get('/users', requireAdmin, catchErrors(listUsers));
+router.get('/users/:id', requireAdmin, catchErrors(listUser));
+router.patch('/users/:id', requireAdmin, catchErrors(updateUser));
+//Fæ forbidden þótt ég sé logguð inn sé ekki afhverju
+router.get('/users/me', requireAuth, catchErrors(currentUser));
+router.patch('/users/me', requireAuth, catchErrors(updateCurrentUser));
 
 /*
 // Series
@@ -144,12 +163,6 @@ router.post('/tv/:id/season/:id/episode', requireAdmin, catchErrors(newEpisode))
 router.delete('/tv/:id/season/:id/episode/:id', requireAdmin, catchErrors(deleteEpisode));
 router.post(/genres', requireAdmin, catchErrors(newGenre));
 
-//Users
-router.get('/users', requireAdmin, catchErrors(listUsers));
-router.get('/users/:id', requireAdmin, catchErrors(listUser));
-router.patch('/users/:id', requireAdmin, catchErrors(updateUser));
-router.get('/users/me', requireAuth, catchErrors(currentUser));
-router.patch('/users/me', requireAuth, catchErrors(updateCurrentUser));
 
 // Series and users
 router.post('/tv/:id/rate', requireAuth, catchErrors(newSeriesRating));
