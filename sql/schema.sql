@@ -56,7 +56,9 @@ CREATE TABLE episodes
   created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp,
   updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp,
   season_id INTEGER NOT NULL,
-  CONSTRAINT season_id FOREIGN KEY (season_id) REFERENCES seasons(id)
+  serie_id INTEGER NOT NULL,
+  CONSTRAINT season_id FOREIGN KEY (season_id) REFERENCES seasons(id),
+  CONSTRAINT serie_id FOREIGN KEY (serie_id) REFERENCES tvshows(id)
 );
 
 CREATE TABLE users
