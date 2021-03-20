@@ -75,7 +75,6 @@ async function insertSeasons() {
           else {
             await query(seasonQuery, row);
           }
-          //console.log(row);
         } catch (e) {
           console.error(e);
         }

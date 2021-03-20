@@ -1,18 +1,19 @@
 import { query, pagedQuery } from '../utils/db.js';
 import { addPageMetadata } from '../utils/addPageMetadata.js';
+import { isInt } from '../utils/validation.js';
 
-async function findById(id) {
-    if (!isInt(id)) {
+async function findSeasons(id, number) {
+    if (!isInt(id) && !isInt(number)) {
       return null;
     }
   
     const seasons = await query(
       `SELECT
-        id,name,airDate,description,image
+        id,name,air_date,overview,poster
       FROM
         seasons
-      WHERE id = $1`,
-      [id],
+      WHERE serie_id = $1 AND number = $2`,
+      [id,number],
     );
   
     if (seasons.rows.length !== 1) {
@@ -33,7 +34,7 @@ export async function listSeasons(req, res) {
 
     const seasons = await pagedQuery(
         `SELECT
-          id, name, number, airdate, description, image
+          id, name, number, air_date, overview, poster
         FROM
           seasons
         ORDER BY id`,
@@ -51,9 +52,10 @@ export async function listSeasons(req, res) {
 }
 
 export async function listSeason(req, res) {
-    const { id } = req.params;
-  
-    const season = await findById(id);
+    const { id, number } = req.params;
+
+    console.log(id);
+    const season = await findSeasons(id, number);
   
     if (!season) {
       return res.status(404).json({ error: 'Season not found' });
@@ -71,28 +73,4 @@ export async function deleteSeason(req, res) {
 
     await deleteRow([id]);
 
-}
-
-export async function newSeriesRating(req, res) {
-
-}
-
-export async function updateSeriesRating(req, res) {
-
-}
-
-export async function deleteSeriesRating(req, res) {
-
-}
-
-export async function newSeriesState(req, res) {
-
-}
-
-export async function updateSeriesState(req, res) {
-
-}
-
-export async function deleteSeriesState(req, res) {
-    
 }

@@ -2,7 +2,7 @@
 CREATE TABLE tvshows
 (
   id SERIAL PRIMARY KEY, 
-  name VARCHAR(256) NOT NULL UNIQUE,
+  name VARCHAR(256) NOT NULL,
   air_date DATE,
   inProduction BOOLEAN,
   tagline VARCHAR(256),
