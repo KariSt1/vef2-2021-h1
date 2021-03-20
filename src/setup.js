@@ -101,8 +101,8 @@ async function insertEpisodes() {
       csvData.shift();
 
       const selectSeasonIDQuery = 'SELECT id FROM seasons WHERE serie_id=$1 AND number=$2';
-      const episodeQuery = 'INSERT INTO episodes (name,number,air_date,overview,serie_id,season_id) VALUES ($1, $2, $3, $4, $5, $6)';
-      const episodeQueryEmptyDate = 'INSERT INTO episodes (name,number,overview,serie_id,season_id) VALUES ($1, $2, $3, $4, $5)';
+      const episodeQuery = 'INSERT INTO episodes (name,number,air_date,overview,season,serie_id,season_id) VALUES ($1, $2, $3, $4, $5, $6, $7)';
+      const episodeQueryEmptyDate = 'INSERT INTO episodes (name,number,overview,season,serie_id,season_id) VALUES ($1, $2, $3, $4, $5, $6)';
 
       csvData.forEach(async (row) => {
         try {
@@ -110,7 +110,6 @@ async function insertEpisodes() {
           const seasonId = seasonResult.rows[0].id;
           //row.splice(6, 1);
           row.splice(5, 1);
-          row.splice(4, 1);
           row.push(seasonId);
           if (row[2] === '') {
             row.splice(2, 1);

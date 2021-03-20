@@ -55,6 +55,7 @@ CREATE TABLE episodes
   overview VARCHAR(2048),
   created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp,
   updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp,
+  season INTEGER CHECK (season > 0),
   season_id INTEGER NOT NULL,
   serie_id INTEGER NOT NULL,
   CONSTRAINT season_id FOREIGN KEY (season_id) REFERENCES seasons(id),
@@ -83,5 +84,3 @@ CREATE TABLE users_tvshows
   status stat,
   rating INTEGER CHECK (rating >= 0 AND rating <= 5)
 );
-
-
