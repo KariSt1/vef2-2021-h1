@@ -1,7 +1,7 @@
 import express from 'express';
 import { listSeason, listSeasons, deleteSeason } from './seasons.js';
 import { listEpisode, deleteEpisode, newEpisode } from './episode.js';
-import { listSeries, listSingleSeries, newSeries, deleteSeries, newSeriesRating, updateSeriesRating } from './series.js';
+import { listSeries, listSingleSeries, newSeries, deleteSeries, updateSeries, newSeriesRating, updateSeriesRating } from './series.js';
 import { listGenres, newGenre } from './genres.js';
 import { 
       listUsers, 
@@ -141,8 +141,11 @@ router.get('/users', requireAdmin, catchErrors(listUsers));
 router.get('/users/:id', requireAdmin, catchErrors(listUser));
 router.patch('/users/:id', requireAdmin, catchErrors(updateUser));
 
+// Series
 router.get('/tv', catchErrors(listSeries));
-router.post('/tv', catchErrors(newSeries));//requireAdmin, catchErrors(newSeries));
+router.post('/tv', requireAdmin, catchErrors(newSeries));
+router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
+//Vantar average rating og ratingcount
 router.get('/tv/:id', catchErrors(listSingleSeries));
 router.delete('/tv/:id', requireAdmin, catchErrors(deleteSeries));
 
@@ -163,7 +166,6 @@ router.patch('/tv/:id/rate', requireAuth, catchErrors(updateSeriesRating));
 
 /*
 // Series
-router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
 router.post('/tv/:id/season', requireAdmin, catchErrors(newSeason));
 
 // Series and users
