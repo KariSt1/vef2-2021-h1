@@ -1,6 +1,14 @@
+import multer from 'multer';
 import { query, pagedQuery } from '../utils/db.js';
 import { addPageMetadata } from '../utils/addPageMetadata.js';
 import { isInt } from '../utils/validation.js';
+
+
+const MIMETYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+];
 
 async function findSeasons(id, number) {
     if (!isInt(id) && !isInt(number)) {
