@@ -162,7 +162,7 @@ router.post('/genres', requireAdmin, catchErrors(newGenre));
 /*
 // Series
 router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
-router.post('/tv/:id/season', requireAdmin, catchErrors(newSeason));
+router.post('/tv/:id/season', requireAdmin, catchErrors(newSeason)); // gulla
 
 // Series and users
 router.post('/tv/:id/rate', requireAuth, catchErrors(newSeriesRating));
