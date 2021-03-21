@@ -69,6 +69,28 @@ async function findGenres(id) {
   return genres.rows;
 }
 
+async function findIfRatingExists(user, id) {
+  const validations = [];
+  if (!isInt(id)) {
+    return null;
+  }
+
+  const series = await query(
+    `SELECT
+      rating, user_id, tvshow_id
+    FROM users_tvshows 
+    INNER JOIN users ON users.id = users_tvshows.user_id
+    WHERE users_tvshows.user_id = $1 AND users_tvshows.tvshow_id = $2
+`, [user,id]);
+
+  if (series.rows.length > 0) {
+    const error = `Rating by this user already exists.`;
+    return [{ error }];
+  }
+
+  return validations;
+}
+
 export async function listSeries(req, res) {
   const { offset = 0, limit = 10 } = req.query;
 
@@ -422,11 +444,27 @@ export async function deleteSeries(req, res) {
 
 export async function newSeriesRating(req, res) {
   const { id } = req.params;
+  const  user  = req.user.id;
   const { rating } = req.body;
 
+  console.log(user);
+  const validations = await findIfRatingExists(user,id);
+
+  if (validations.length > 0) {
+    return res.status(400).json({
+      errors: validations,
+    });
+  }
+
+    const q = 'INSERT INTO users_tvshows (user_id,tvshow_id,rating) VALUES ($1,$2,$3) RETURNING user_id,rating,tvshow_id';
+    const result = await query(q, [user,id,rating]);
+    return res.status(201).json(result.rows[0]);
 }
 
 export async function updateSeriesRating(req, res) {
+  const { id } = req.params;
+  const { user } = req.user.id;
+  const { rating } = req.body;
 
 }
 
