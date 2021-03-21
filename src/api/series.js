@@ -417,8 +417,8 @@ async function updateSeriesWithImage(req, res, next) {
     isString(series.description) ? xss(series.description) : null,
     isString(series.language) ? xss(series.language) : null,
     isString(series.network) ? xss(series.network) : null,
-    isString(series.homepage) ? xss(series.homepage) : null,
-  ];
+    isString(series.homepage) ? xss(series.homepage) : null, 
+   ];
 
   if (!fields.filter(Boolean).length === 0) {
     return res.status(400).json({ error: 'Nothing to update' });
@@ -457,6 +457,7 @@ export async function listSingleSeries(req, res) {
 
 export async function updateSeries(req, res, next) {
   return withMulter(req, res, next, updateSeriesWithImage);
+
 }
 
 export async function deleteSeries(req, res) {
@@ -488,12 +489,10 @@ export async function newSeriesRating(req, res) {
 
 export async function updateSeriesRating(req, res) {
   const { id } = req.params;
-  const { user } = req.user.id;
+  const  user  = req.user.id;
   const { rating } = req.body;
 
-  const q = 'INSERT INTO users_tvshows (user_id,tvshow_id,rating) VALUES ($1,$2,$3) RETURNING user_id,rating,tvshow_id';
-  const result = await query(q, [user,id,rating]);
-  return res.status(201).json(result.rows[0]);
+
 }
 
 export async function deleteSeriesRating(req, res) {
