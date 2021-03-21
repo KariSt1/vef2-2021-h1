@@ -1,6 +1,14 @@
+import multer from 'multer';
 import { query, pagedQuery } from '../utils/db.js';
 import { addPageMetadata } from '../utils/addPageMetadata.js';
 import { isInt } from '../utils/validation.js';
+
+
+const MIMETYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+];
 
 async function findSeasons(id, number) {
     if (!isInt(id) && !isInt(number)) {
@@ -100,4 +108,27 @@ export async function deleteSeason(req, res) {
   await query(q, [id,number]);
 
   return res.json({});
+}
+
+function validateImageMimetype(mimetype) {
+  return MIMETYPES.indexOf(mimetype.toLowerCase()) >= 0;
+}
+
+async function withMulter(req, res, next, fn) {
+  multer({ dest: './temp' })
+    .single('image')(req, res, (err) => {
+      if (err) {
+        if (err.message === 'Unexpected field') {
+          const errors = [{
+            field: 'image',
+            error: 'Unable to read image',
+          }];
+          return res.status(400).json({ errors });
+        }
+
+        return next(err);
+      }
+
+      return fn(req, res, next).catch(next);
+    });
 }

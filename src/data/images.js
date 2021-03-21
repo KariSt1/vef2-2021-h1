@@ -1,15 +1,60 @@
+import dotenv from 'dotenv';
 import util from 'util';
-import fs from 'fs';
 import path from 'path';
 import { v2 as cloudinary } from 'cloudinary';
-import debug from '../utils/debug';
+import multer from 'multer';
 
-const readDirAsync = util.promisify(fs.readdir);
-const statAsync = util.promisify(fs.stat);
-const resourcesAsync = util.promisify(cloudinary.api.resources);
-const uploadAsync = util.promisify(cloudinary.uploader.upload);
+const {
+  CLOUDINARY_URL: cloudinaryURL = null,
+} = process.env;
 
-// Cloudinary er stillt sjálfkrafa því við höfum CLOUDINARY_URL í umhverfi
+if (!cloudinaryURL) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+}
+
+const MIMETYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+];
+
+
+async function withMulter(req, res, next, fn) {
+  multer({ dest: './temp' })
+    .single('image')(req, res, (err) => {
+      if (err) {
+        if (err.message === 'Unexpected field') {
+          const errors = [{
+            field: 'image',
+            error: 'Unable to read image',
+          }];
+          return res.status(400).json({ errors });
+        }
+
+        return next(err);
+      }
+
+      return fn(req, res, next).catch(next);
+    });
+}
+
+
+
+
+/*
+
+
+
+
+
+
+úr image.js skránni hans óla:
+
+*/
 
 // Geymum í minni niðurstöður úr því að lista allar myndir frá Cloudinary
 let cachedListImages = null;
@@ -30,7 +75,7 @@ async function listImages() {
 
 function imageComparer(current) {
   // TODO hér ættum við að bera saman fleiri hluti, t.d. width og height
-  return uploaded => uploaded.bytes === current.size;
+  return (uploaded) => uploaded.bytes === current.size;
 }
 
 async function getImageIfUploaded(imagePath) {
