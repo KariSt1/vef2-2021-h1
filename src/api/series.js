@@ -43,7 +43,11 @@ export async function listSeries(req, res) {
 }
 
 export async function newSeries(req, res) {
-
+  const { name, airDate, genres,
+    inProduction, tagline, image,
+    description, language, network, homepage 
+  } = req.body;
+  res.json({test: 'wow'});
 }
 
 export async function listSingleSeries(req, res) {

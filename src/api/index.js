@@ -1,5 +1,5 @@
 import express from 'express';
-import { listSeries, listSingleSeries } from './series.js';
+import { listSeries, listSingleSeries, newSeries } from './series.js';
 import { listSeason, listSeasons } from './seasons.js';
 import { listEpisode } from './episode.js';
 import { listGenres } from './genres.js';
@@ -143,6 +143,7 @@ router.get('/users/me', requireAuth, catchErrors(currentUser));
 router.patch('/users/me', requireAuth, catchErrors(updateCurrentUser));
 
 router.get('/tv', catchErrors(listSeries));
+router.post('/tv', catchErrors(newSeries));//requireAdmin, catchErrors(newSeries));
 router.get('/tv/:id', catchErrors(listSingleSeries));
 
 //tengja serie_id í seasons.js til að þetta virki
@@ -157,7 +158,6 @@ router.get('/genres', catchErrors(listGenres));
 
 /*
 // Series
-router.post('/tv', requireAdmin, catchErrors(newSeries));
 router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
 router.delete('/tv/:id', requireAdmin, catchErrors(deleteSeries));
 router.post('/tv/:id/season', requireAdmin, catchErrors(newSeason));
