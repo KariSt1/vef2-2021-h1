@@ -22,6 +22,23 @@ async function findEpisode(serie_id,season_number,episode_number) {
   
     return episode.rows[0];
   }
+  async function findSeasonId(season_number) {
+    if (!isInt(season_number)) {
+      return null;
+    }
+  
+    const season_id = await query(
+      `SELECT
+        id
+      FROM
+        seasons
+      WHERE number = $1`,
+      [season_number],
+    );
+  
+    return season_id.rows;
+  }
+
 
 async function validateEpisode(name, number) {
   const validations = [];
@@ -56,9 +73,10 @@ export async function listEpisode(req, res) {
 }
 
 export async function newEpisode(req, res) {
-    const { season_id,serie_id } = req.params;
+    const { season_number,serie_id} = req.params;
     const { name,number, air_date, overview} = req.body;
   
+    const { season_id } = await findSeasonId(season_number);
     const validations = await validateEpisode(name, number);
   
     if (validations.length > 0) {
@@ -66,28 +84,28 @@ export async function newEpisode(req, res) {
         errors: validations,
       });
     }
-    const q = 'INSERT INTO episodes (name,number,season_id,serie_id) VALUES ($1,$2,$3,$4) RETURNING id, name, number, air_date,overview,season_id,serie_id';
-    const qAir_date = 'INSERT INTO episodes (name,number,air_date,season_id,serie_id) VALUES ($1,$2,$3,$4,$5) RETURNING id, name, number, air_date,overview,season_id,serie_id';
-    const qOverview = 'INSERT INTO episodes (name,number,overview,season_id,serie_id) VALUES ($1,$2,$3,$4,$5) RETURNING id, name, number, air_date,overview,season_id,serie_id';
-    const qAll= 'INSERT INTO episodes (name,number,air_date,overview,season_id,serie_id) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, name, number, air_date,overview,season_id,serie_id';
+    const q = 'INSERT INTO episodes (name,number,season, saeason_id,serie_id) VALUES ($1,$2,$3,$4,$5) RETURNING id, name, number, air_date,overview,season_id,serie_id';
+    const qAir_date = 'INSERT INTO episodes (name,number,air_date,season,season_id,serie_id) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, name, number, air_date,overview,season_id,serie_id';
+    const qOverview = 'INSERT INTO episodes (name,number,overview,season,season_id,serie_id) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, name, number, air_date,overview,season_id,serie_id';
+    const qAll= 'INSERT INTO episodes (name,number,air_date,overview,season,season_id,serie_id) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id, name, number, air_date,overview,season_id,serie_id';
   
     if (air_date === null && overview === null) {
-      const result = await query(q, [xss(name),number,season_id,serie_id]);
+      const result = await query(q, [xss(name),number,season_number,season_id,serie_id]);
       return res.status(201).json(result.rows[0]);
     }
 
     else if (air_date === null) {
-      const result = await query(qOverview, [xss(name),number,overview,season_id,serie_id]);
+      const result = await query(qOverview, [xss(name),number,overview,season_number,season_id,serie_id]);
       return res.status(201).json(result.rows[0]);
     }
 
     else if (overview === null) {
-      const result = await query(qAir_date, [xss(name),number,air_date,season_id,serie_id]);
+      const result = await query(qAir_date, [xss(name),number,air_date,season_number,season_id,serie_id]);
       return res.status(201).json(result.rows[0]);
     }
 
     else {
-        const result = await query(qAll, [xss(name),number,air_date,overview,season_id,serie_id]);
+        const result = await query(qAll, [xss(name),number,air_date,overview,season_number,season_id,serie_id]);
         return res.status(201).json(result.rows[0]);
     }
   

@@ -23,7 +23,7 @@ dotenv.config();
 export const app = express();
 app.use(express.json());
 
-const defaultTokenLifetime = 60 * 60 * 24 * 7; // 7 dagar
+const defaultTokenLifetime = 60*60; 
 
 const {
   JWT_SECRET: jwtSecret,
