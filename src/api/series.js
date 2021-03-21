@@ -24,6 +24,40 @@ async function findById(id) {
   return series.rows[0];
 }
 
+async function findSeasons(id) {
+  if (!isInt(id)) {
+    return null;
+  }
+
+  const seasons = await query(
+    `SELECT
+      name,air_date,overview,poster
+    FROM
+      seasons
+    WHERE serie_id = $1 ORDER BY number `,
+    [id],
+  );
+
+  return seasons.rows;
+}
+
+async function findGenres(id) {
+  if (!isInt(id)) {
+    return null;
+  }
+
+  const genres = await query(
+    `SELECT
+      genre_name
+    FROM
+      tvshows_genres
+    WHERE tvshow_id=$1 `,
+    [id],
+  );
+
+  return genres.rows;
+}
+
 export async function listSeries(req, res) {
   const { offset = 0, limit = 10 } = req.query;
 
@@ -54,12 +88,18 @@ export async function listSingleSeries(req, res) {
   const { id } = req.params;
   
   const singleSeries = await findById(id);
+  const seasons = await findSeasons(id);
+  const genres = await findGenres(id);
 
   if (!singleSeries) {
     return res.status(404).json({ error: 'Series not found' });
   }
 
-  return res.json(singleSeries);
+  return res.json({
+    items: singleSeries,
+    genres: genres,
+    seasons: seasons
+});
 }
 
 export async function updateSeries(req, res) {

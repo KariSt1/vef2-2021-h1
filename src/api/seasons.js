@@ -23,6 +23,27 @@ async function findSeasons(id, number) {
     return seasons.rows[0];
   }
 
+  async function findEpisodes(id, number) {
+    if (!isInt(id) && !isInt(number)) {
+      return null;
+    }
+  
+    const episodes = await query(
+      `SELECT
+        name,number,air_date,overview
+      FROM
+        episodes
+      WHERE serie_id = $1 AND season = $2 ORDER BY number `,
+      [id,number],
+    );
+  
+    if (episodes.rows.length == 0) {
+      return null;
+    }
+  
+    return episodes.rows;
+  }
+
 async function deleteRow(id) {
     const q = 'DELETE FROM seasons WHERE id = $1';
   
@@ -54,14 +75,17 @@ export async function listSeasons(req, res) {
 export async function listSeason(req, res) {
     const { id, number } = req.params;
 
-    console.log(id);
     const season = await findSeasons(id, number);
+    const episodes = await findEpisodes(id,number);
   
     if (!season) {
       return res.status(404).json({ error: 'Season not found' });
     }
   
-    return res.json(season);
+    return res.json({
+      items: season,
+      episodes: episodes
+  });
   }
 
 export async function newSeason(req, res) {
