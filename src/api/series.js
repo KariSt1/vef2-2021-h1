@@ -2,7 +2,7 @@ import multer from 'multer';
 import cloudinary from 'cloudinary';
 import xss from 'xss';
 import { parse, isValid, format } from 'date-fns';
-import { query, pagedQuery } from '../utils/db.js';
+import { query, pagedQuery, conditionalUpdate } from '../utils/db.js';
 import { addPageMetadata } from '../utils/addPageMetadata.js';
 import { isInt, isNotEmptyString, isEmpty, lengthValidationError, isBoolean, isString } from '../utils/validation.js';
 
@@ -153,7 +153,7 @@ async function validateSeries(
   }
 
   // Description validation
-  if (!patching || description !== null) {
+  if (!patching || description || isEmpty(description)) {
     if (description !== null && !isString(description)) {
       validation.push({
         msg: 'description must be a string',
@@ -175,7 +175,7 @@ async function validateSeries(
   }
 
   // Network validation
-  if (!patching || network !== null) {
+  if (!patching || network || isEmpty(network)) {
     if (network !== null && !isString(network)) {
       validation.push({
         msg: 'network must be a string',
@@ -186,7 +186,7 @@ async function validateSeries(
   }
 
   // Homepage validation
-  if (!patching || homepage !== null) {
+  if (!patching || homepage || isEmpty(homepage)) {
     if (homepage !== null && !isString(homepage)) {
       validation.push({
         msg: 'homepage must be a string',
@@ -308,16 +308,28 @@ async function createSeriesWithImage(req, res, next) {
 
 async function updateSeriesWithImage(req, res, next) {
   const { id } = req.params;
-  const { title, price, description, category } = req.body;
+  const {
+    name, airDate, inProduction, tagline, description,
+    language, network, homepage,
+  } = req.body;
 
   // file er tómt ef engri var uploadað
   const { file: { path, mimetype } = {} } = req;
 
   const hasImage = Boolean(path && mimetype);
 
-  const product = { title, price, description, category };
+  const series = {
+    name,
+    airDate,
+    inProduction,
+    tagline,
+    description,
+    language,
+    network,
+    homepage,
+  };
 
-  const validations = await validateSeries(product, true, id);
+  const validations = await validateSeries(series, true, id);
 
   if (hasImage) {
     if (!validateImageMimetype(mimetype)) {
@@ -354,7 +366,7 @@ async function updateSeriesWithImage(req, res, next) {
     }
 
     if (upload && upload.secure_url) {
-      product.image = upload.secure_url;
+      series.image = upload.secure_url;
     } else {
       // Einhverja hluta vegna er ekkert `secure_url`?
       return next(new Error('Cloudinary upload missing secure_url'));
@@ -362,19 +374,27 @@ async function updateSeriesWithImage(req, res, next) {
   }
 
   const fields = [
-    isString(product.title) ? 'title' : null,
-    isString(product.price) ? 'price' : null,
-    isString(product.description) ? 'description' : null,
-    isString(product.category) ? 'category_id' : null,
-    isString(product.image) ? 'image' : null,
+    isString(series.name) ? 'name' : null,
+    isString(series.airDate) ? 'airDate' : null,
+    isString(series.inProduction) ? 'inProduction' : null,
+    isString(series.tagline) ? 'tagline' : null,
+    isString(series.image) ? 'image' : null,
+    isString(series.description) ? 'description' : null,
+    isString(series.language) ? 'language' : null,
+    isString(series.network) ? 'network' : null,
+    isString(series.homepage) ? 'homepage' : null,
   ];
 
   const values = [
-    isString(product.title) ? xss(product.title) : null,
-    isString(product.price) ? xss(product.price) : null,
-    isString(product.description) ? xss(product.description) : null,
-    isString(product.category) ? xss(product.category) : null,
-    isString(product.image) ? xss(product.image) : null,
+    isString(series.name) ? xss(series.name) : null,
+    isString(series.airDate) ? xss(series.airDate) : null,
+    isString(series.inProduction) ? xss(series.inProduction) : null,
+    isString(series.tagline) ? xss(series.tagline) : null,
+    isString(series.image) ? xss(series.image) : null,
+    isString(series.description) ? xss(series.description) : null,
+    isString(series.language) ? xss(series.language) : null,
+    isString(series.network) ? xss(series.network) : null,
+    isString(series.homepage) ? xss(series.homepage) : null,
   ];
 
   if (!fields.filter(Boolean).length === 0) {
@@ -385,7 +405,7 @@ async function updateSeriesWithImage(req, res, next) {
   fields.push('updated');
   values.push(new Date());
 
-  const result = await conditionalUpdate('products', id, fields, values);
+  const result = await conditionalUpdate('tvshows', id, fields, values);
 
   return res.status(201).json(result.rows[0]);
 }
@@ -412,8 +432,8 @@ export async function listSingleSeries(req, res) {
 });
 }
 
-export async function updateSeries(req, res) {
-
+export async function updateSeries(req, res, next) {
+  return withMulter(req, res, next, updateSeriesWithImage);
 }
 
 export async function deleteSeries(req, res) {
