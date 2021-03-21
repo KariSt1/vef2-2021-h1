@@ -293,16 +293,13 @@ async function createSeriesWithImage(req, res, next) {
     xss(series.name),
     xss(series.airDate),
     xss(series.inProduction),
-    xss(series.tagline),
+    (series.tagline === null) ? series.tagline : xss(series.tagline),
     xss(series.image),
-    xss(series.description),
+    (series.description === null) ? series.description : xss(series.description),
     xss(series.language),
-    series.network,
-    series.homepage,
+    (series.network === null) ? series.network : xss(series.network),
+    (series.network === null) ? series.homepage : xss(series.network),
   ];
-
-  console.log(series);
-  console.log(values);
 
   const result = await query(q, values);
 
