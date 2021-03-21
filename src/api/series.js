@@ -468,12 +468,9 @@ export async function newSeriesRating(req, res) {
 
 export async function updateSeriesRating(req, res) {
   const { id } = req.params;
-  const { user } = req.user.id;
+  const  user  = req.user.id;
   const { rating } = req.body;
 
-  const q = 'INSERT INTO users_tvshows (user_id,tvshow_id,rating) VALUES ($1,$2,$3) RETURNING user_id,rating,tvshow_id';
-  const result = await query(q, [user,id,rating]);
-  return res.status(201).json(result.rows[0]);
 }
 
 export async function deleteSeriesRating(req, res) {
