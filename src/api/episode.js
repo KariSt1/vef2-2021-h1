@@ -36,7 +36,8 @@ async function findEpisode(serie_id,season_number,episode_number) {
       [season_number],
     );
   
-    return season_id.rows;
+    console.log(season_id.rows[0].id);
+    return season_id.rows[0].id;
   }
 
 
@@ -76,7 +77,7 @@ export async function newEpisode(req, res) {
     const { season_number,serie_id} = req.params;
     const { name,number, air_date, overview} = req.body;
   
-    const { season_id } = await findSeasonId(season_number);
+    const season_id = await findSeasonId(season_number);
     const validations = await validateEpisode(name, number);
   
     if (validations.length > 0) {

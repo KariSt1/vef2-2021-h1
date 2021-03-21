@@ -60,14 +60,15 @@ async function deleteRow(id) {
 
 export async function listSeasons(req, res) {
     const { offset = 0, limit = 10 } = req.query;
+    const { id } = req.params;
 
     const seasons = await pagedQuery(
         `SELECT
           id, name, number, air_date, overview, poster
         FROM
           seasons
-        ORDER BY id`,
-        [],
+        WHERE serie_id = $1 ORDER BY id`,
+        [id],
         { offset, limit },
       );
 
