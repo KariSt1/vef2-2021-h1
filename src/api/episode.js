@@ -57,7 +57,7 @@ export async function listEpisode(req, res) {
 
 export async function newEpisode(req, res) {
     const { season_id,serie_id } = req.params;
-    const { name,number} = req.body;
+    const { name,number, air_date, overview} = req.body;
   
     const validations = await validateEpisode(name, number);
   
@@ -66,11 +66,31 @@ export async function newEpisode(req, res) {
         errors: validations,
       });
     }
+    const q = 'INSERT INTO episodes (name,number,season_id,serie_id) VALUES ($1,$2,$3,$4) RETURNING id, name, number, air_date,overview,season_id,serie_id';
+    const qAir_date = 'INSERT INTO episodes (name,number,air_date,season_id,serie_id) VALUES ($1,$2,$3,$4,$5) RETURNING id, name, number, air_date,overview,season_id,serie_id';
+    const qOverview = 'INSERT INTO episodes (name,number,overview,season_id,serie_id) VALUES ($1,$2,$3,$4,$5) RETURNING id, name, number, air_date,overview,season_id,serie_id';
+    const qAll= 'INSERT INTO episodes (name,number,air_date,overview,season_id,serie_id) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, name, number, air_date,overview,season_id,serie_id';
   
-    const q = 'INSERT INTO episodes (name,number,season_id,serie_id) VALUES ($1,$2,$3,$4) RETURNING id, name, number,season_id,serie_id';
-    const result = await query(q, [xss(name),number,season_id,serie_id]);
+    if (air_date === null && overview === null) {
+      const result = await query(q, [xss(name),number,season_id,serie_id]);
+      return res.status(201).json(result.rows[0]);
+    }
+
+    else if (air_date === null) {
+      const result = await query(qOverview, [xss(name),number,overview,season_id,serie_id]);
+      return res.status(201).json(result.rows[0]);
+    }
+
+    else if (overview === null) {
+      const result = await query(qAir_date, [xss(name),number,air_date,season_id,serie_id]);
+      return res.status(201).json(result.rows[0]);
+    }
+
+    else {
+        const result = await query(qAll, [xss(name),number,air_date,overview,season_id,serie_id]);
+        return res.status(201).json(result.rows[0]);
+    }
   
-    return res.status(201).json(result.rows[0]);
   }
 
 

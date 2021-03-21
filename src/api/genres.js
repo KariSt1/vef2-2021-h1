@@ -36,7 +36,6 @@ export async function listGenres(req, res) {
 }
 
 export async function newGenre(req, res) {
-  //const { season_id,serie_id } = req.params;
   const { name } = req.body;
   
   const validations = await validateGenre(name);
