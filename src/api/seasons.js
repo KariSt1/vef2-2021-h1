@@ -83,7 +83,7 @@ export async function listSeason(req, res) {
     }
   
     return res.json({
-      items: season,
+      season: season,
       episodes: episodes
   });
   }
@@ -93,8 +93,11 @@ export async function newSeason(req, res) {
 }
 
 export async function deleteSeason(req, res) {
-    const { id } = req.params;
+  const { id, number } = req.params;
 
-    await deleteRow([id]);
+  const q = 'DELETE FROM seasons WHERE serie_id = $1 AND number = $2';
 
+  await query(q, [id,number]);
+
+  return res.json({});
 }

@@ -40,5 +40,12 @@ export async function newEpisode(req, res) {
 }
 
 export async function deleteEpisode(req, res) {
+  const { serie_id,season_number, episode_number } = req.params;
 
+  const q = `DELETE FROM episodes WHERE serie_id = $1 AND season = $2 AND number = $3`;
+
+  await query(q, [serie_id,season_number,episode_number]);
+
+  return res.json({});
+  
 }
