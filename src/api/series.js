@@ -1,8 +1,10 @@
 import multer from 'multer';
+import cloudinary from 'cloudinary';
+import xss from 'xss';
 import { parse, isValid, format } from 'date-fns';
 import { query, pagedQuery } from '../utils/db.js';
 import { addPageMetadata } from '../utils/addPageMetadata.js';
-import { isInt, isNotEmptyString, isEmpty, lengthValidationError, isBoolean } from '../utils/validation.js';
+import { isInt, isNotEmptyString, isEmpty, lengthValidationError, isBoolean, isString } from '../utils/validation.js';
 
 const MIMETYPES = [
   'image/jpeg',
@@ -85,7 +87,9 @@ export async function listSeries(req, res) {
 }
 
 async function validateSeries(
-  { name, airDate, inProduction, tagline, image, description, language, network, url } = {},
+  {
+    name, airDate, inProduction, tagline, image, description, language, network, homepage
+  } = {},
   patching = false,
   id = null,
 ) {
@@ -102,18 +106,33 @@ async function validateSeries(
     }
   }
 
-  // TODO DATE VALIDATION
+  // airDate validation
+  if (!patching || airDate || isEmpty(airDate)) {
+    if (!isValid(new Date(airDate))) {
+      validation.push({
+        msg: 'airDate must be a date',
+        param: 'airDate',
+        location: 'body',
+      });
+    }
+  }
 
   // inProduction validation
   if (!patching || inProduction || isEmpty(inProduction)) {
-    if(!inProduction) {
+    if (!inProduction) {
       validation.push({
         msg: 'inProduction is required',
         param: 'inProduction',
         location: 'body',
       });
     }
-    if (!isBoolean(inProduction)) {
+    let booleanInProduction;
+    if (inProduction === 'true') {
+      booleanInProduction = true;
+    } else if (inProduction === 'false') {
+      booleanInProduction = false;
+    }
+    if (!isBoolean(booleanInProduction)) {
       validation.push({
         msg: 'inProduction must be a boolean',
         param: 'inProduction',
@@ -122,16 +141,29 @@ async function validateSeries(
     }
   }
 
-  // Description validation
-  if (!patching) {
-    if (!isNotEmptyString(description, { min: 1 })) {
+  // Tagline validation
+  if (!patching || tagline || isEmpty(tagline)) {
+    if (!isString(tagline)) {
       validation.push({
-        field: 'description',
-        error: lengthValidationError(description, 1),
+        msg: 'tagline must be a string',
+        param: 'tagline',
+        location: 'body',
       });
     }
   }
 
+  // Description validation
+  if (!patching || description || isEmpty(description)) {
+    if (!isString(description)) {
+      validation.push({
+        msg: 'description must be a string',
+        param: 'description',
+        location: 'body',
+      });
+    }
+  }
+
+  /*
   if (!patching || category || isEmpty(category)) {
     let categoryInvalid = false;
 
@@ -157,6 +189,7 @@ async function validateSeries(
       });
     }
   }
+  */
 
   return validation;
 }
@@ -184,17 +217,21 @@ async function withMulter(req, res, next, fn) {
     });
 }
 
-async function createProductWithImage(req, res, next) {
-  const { title, price, description, category } = req.body;
+async function createSeriesWithImage(req, res, next) {
+  const {
+    name, airDate, inProduction, tagline, image, description, language, network, homepage,
+  } = req.body;
 
   // file er tómt ef engri var uploadað
   const { file: { path, mimetype } = {} } = req;
 
   const hasImage = Boolean(path && mimetype);
 
-  const product = { title, price, description, category };
+  const series = {
+    name, airDate, inProduction, tagline, image, description, language, network, homepage,
+  };
 
-  const validations = await validateProduct(product);
+  const validations = await validateSeries(series);
 
   if (hasImage) {
     if (!validateImageMimetype(mimetype)) {
@@ -231,7 +268,7 @@ async function createProductWithImage(req, res, next) {
     }
 
     if (upload && upload.secure_url) {
-      product.image = upload.secure_url;
+      series.image = upload.secure_url;
     } else {
       // Einhverja hluta vegna er ekkert `secure_url`?
       return next(new Error('Cloudinary upload missing secure_url'));
@@ -240,21 +277,25 @@ async function createProductWithImage(req, res, next) {
 
   const q = `
     INSERT INTO
-      products
-      (title, price, description, category_id, image)
+      tvshows
+      (name, air_date, inProduction, tagline, image, description, language, network, homepage)
     VALUES
-      ($1, $2, $3, $4, $5)
-    RETURNING id, title, price, description, category_id, image
+      ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    RETURNING id, name, air_date, inProduction, tagline, image, description, language, network, homepage
   `;
-
   const values = [
-    xss(product.title),
-    xss(product.price),
-    xss(product.description),
-    xss(product.category),
-    xss(product.image),
+    xss(series.name),
+    xss(series.airDate),
+    xss(series.inProduction),
+    xss(series.tagline),
+    xss(series.image),
+    xss(series.description),
+    xss(series.language),
+    xss(series.network),
+    xss(series.homepage),
   ];
 
+  console.log(values);
   const result = await query(q, values);
 
   return res.status(201).json(result.rows[0]);
@@ -344,14 +385,8 @@ async function updateSeriesWithImage(req, res, next) {
   return res.status(201).json(result.rows[0]);
 }
 
-async function createProduct(req, res, next) {
+export async function newSeries(req, res, next) {  
   return withMulter(req, res, next, createSeriesWithImage);
-}
-
-export async function newSeries(req, res) {  
-  const date = isValid('2021-01-15');
-  console.log(date);
-  
 }
 
 export async function listSingleSeries(req, res) {
