@@ -27,8 +27,8 @@ CREATE TABLE tvshows_genres
 (
   tvshow_id INTEGER NOT NULL,
   genre_name VARCHAR(256) NOT NULL,
-  CONSTRAINT tvshow_id FOREIGN KEY (tvshow_id) REFERENCES tvshows(id),
-  CONSTRAINT genre_name FOREIGN KEY (genre_name) REFERENCES genres(name)
+  CONSTRAINT tvshow_id FOREIGN KEY (tvshow_id) REFERENCES tvshows(id) ON DELETE CASCADE,
+  CONSTRAINT genre_name FOREIGN KEY (genre_name) REFERENCES genres(name) ON DELETE CASCADE
 );
 
 CREATE TABLE seasons
@@ -43,7 +43,7 @@ CREATE TABLE seasons
   updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp,
   serie VARCHAR(256) NOT NULL,
   serie_id INTEGER NOT NULL,
-  CONSTRAINT serie_id FOREIGN KEY (serie_id) REFERENCES tvshows(id)
+  CONSTRAINT serie_id FOREIGN KEY (serie_id) REFERENCES tvshows(id) ON DELETE CASCADE
 );
 
 CREATE TABLE episodes
@@ -58,8 +58,8 @@ CREATE TABLE episodes
   season INTEGER CHECK (season > 0),
   season_id INTEGER NOT NULL,
   serie_id INTEGER NOT NULL,
-  CONSTRAINT season_id FOREIGN KEY (season_id) REFERENCES seasons(id),
-  CONSTRAINT serie_id FOREIGN KEY (serie_id) REFERENCES tvshows(id)
+  CONSTRAINT season_id FOREIGN KEY (season_id) REFERENCES seasons(id) ON DELETE CASCADE,
+  CONSTRAINT serie_id FOREIGN KEY (serie_id) REFERENCES tvshows(id) ON DELETE CASCADE
 );
 
 CREATE TABLE users
@@ -79,8 +79,8 @@ CREATE TABLE users_tvshows
 (
   user_id INTEGER NOT NULL,
   tvshow_id INTEGER NOT NULL,
-  CONSTRAINT user_id FOREIGN KEY (user_id) REFERENCES users(id),
-  CONSTRAINT tvshow_id FOREIGN KEY (tvshow_id) REFERENCES tvshows(id),
+  CONSTRAINT user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT tvshow_id FOREIGN KEY (tvshow_id) REFERENCES tvshows(id) ON DELETE CASCADE,
   status stat,
   rating INTEGER CHECK (rating >= 0 AND rating <= 5)
 );
