@@ -42,15 +42,7 @@ async function withMulter(req, res, next, fn) {
     });
 }
 
-
-
-
 /*
-
-
-
-
-
 
 úr image.js skránni hans óla:
 
