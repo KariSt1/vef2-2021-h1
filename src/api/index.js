@@ -165,8 +165,6 @@ router.post('/genres', requireAdmin, catchErrors(newGenre));
 router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
 router.post('/tv/:id/season', requireAdmin, catchErrors(newSeason));
 
-
-
 // Series and users
 router.post('/tv/:id/rate', requireAuth, catchErrors(newSeriesRating));
 router.patch('/tv/:id/rate', requireAuth, catchErrors(updateSeriesRating));

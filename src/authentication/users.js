@@ -80,7 +80,7 @@ export async function validateUser(
     if (!isNotEmptyString(email, { min: 1, max: 64 })) {
       validations.push({
         field: 'email',
-        error: lengthValidationError(1, 64),
+        error: lengthValidationError(email,1, 64),
       });
     }
 
@@ -101,10 +101,10 @@ export async function validateUser(
   }
 
   if (!patching || password || isEmpty(password)) {
-    if (!isNotEmptyString(password, { min: 8 })) {
+    if (!isNotEmptyString(password, { min: 10 })) {
       validations.push({
         field: 'password',
-        error: lengthValidationError(password, 8),
+        error: lengthValidationError(password, 10),
       });
     }
   }

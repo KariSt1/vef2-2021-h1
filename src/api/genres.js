@@ -1,7 +1,7 @@
 import xss from 'xss';
 import { query, pagedQuery } from '../utils/db.js';
 import { addPageMetadata } from '../utils/addPageMetadata.js';
-import { isNotEmptyString } from '../utils/validation.js';
+import { isNotEmptyString, lengthValidationError } from '../utils/validation.js';
 
 async function validateGenre(name) {
   if (!isNotEmptyString(name, { min: 1, max: 256 })) {

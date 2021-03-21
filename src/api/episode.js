@@ -1,5 +1,5 @@
 import { query, pagedQuery } from '../utils/db.js';
-import { isInt, isNotEmptyString } from '../utils/validation.js';
+import { isInt, isNotEmptyString, lengthValidationError } from '../utils/validation.js';
 import xss from 'xss';
 
 async function findEpisode(serie_id,season_number,episode_number) {
@@ -24,21 +24,22 @@ async function findEpisode(serie_id,season_number,episode_number) {
   }
 
 async function validateEpisode(name, number) {
+  const validations = [];
   if (!isNotEmptyString(name, { min: 1, max: 256 })) {
-    return [{
+    validations.push({
       field: 'name',
       error: lengthValidationError(name, 1, 256),
-    }];
+    });
   }
 
   if (!isInt(number)) {
-    return [{
+    validations.push({
       field: 'number',
-      error: lengthValidationError(number, 1, 256),
-    }];
+      error: 'number must be an integer larger than 0',
+    });
   }
 
-  return [];
+  return validations;
 }
   
 
@@ -67,7 +68,7 @@ export async function newEpisode(req, res) {
     }
   
     const q = 'INSERT INTO episodes (name,number,season_id,serie_id) VALUES ($1,$2,$3,$4) RETURNING id, name, number,season_id,serie_id';
-    const result = await query(q, [xss(name), number,season_id,serie_id]);
+    const result = await query(q, [xss(name),number,season_id,serie_id]);
   
     return res.status(201).json(result.rows[0]);
   }

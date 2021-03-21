@@ -13,6 +13,7 @@ import {
 
 import {
   isNotEmptyString,
+  lengthValidationError,
   toPositiveNumberOrDefault,
 } from '../utils/validation.js';
 import catchErrors from '../utils/catchErrors.js';
@@ -108,14 +109,14 @@ async function loginRoute(req, res) {
   if (!isNotEmptyString(username)) {
     validations.push({
       field: 'username',
-      error: 'Username is required',
+      error: 'Username is required. ' + lengthValidationError(username,1,256),
     });
   }
 
-  if (!isNotEmptyString(password)) {
+  if (!isNotEmptyString(password, { min: 10} )) {
     validations.push({
       field: 'password',
-      error: 'Password is required',
+      error: 'Password is required. ' + lengthValidationError(password,10),
     });
   }
 
