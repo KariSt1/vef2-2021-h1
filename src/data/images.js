@@ -1,8 +1,17 @@
 import dotenv from 'dotenv';
 import util from 'util';
+import fs from 'fs';
 import path from 'path';
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
+import debug from '../utils/debug.js';
+
+const readDirAsync = util.promisify(fs.readdir);
+const statAsync = util.promisify(fs.stat);
+const resourcesAsync = util.promisify(cloudinary.api.resources);
+const uploadAsync = util.promisify(cloudinary.uploader.upload);
+
+dotenv.config();
 
 const {
   CLOUDINARY_URL: cloudinaryURL = null,
@@ -82,7 +91,7 @@ async function getImageIfUploaded(imagePath) {
   return found;
 }
 
-async function uploadImageIfNotUploaded(imagePath) {
+export async function uploadImageIfNotUploaded(imagePath) {
   const alreadyUploaded = await getImageIfUploaded(imagePath);
 
   if (alreadyUploaded) {
@@ -96,7 +105,7 @@ async function uploadImageIfNotUploaded(imagePath) {
   return uploaded.secure_url;
 }
 
-async function uploadImagesFromDisk(imageDir) {
+export async function uploadImagesFromDisk(imageDir) {
   const imagesFromDisk = await readDirAsync(imageDir);
 
   const filteredImages = imagesFromDisk
@@ -118,7 +127,3 @@ async function uploadImagesFromDisk(imageDir) {
 
   return images;
 }
-
-module.exports = {
-  uploadImagesFromDisk,
-};
