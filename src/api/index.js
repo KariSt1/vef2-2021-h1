@@ -2,7 +2,7 @@ import express from 'express';
 import { listSeason, listSeasons, deleteSeason } from './seasons.js';
 import { listEpisode, deleteEpisode, newEpisode } from './episode.js';
 import { listSeries, listSingleSeries, newSeries, deleteSeries } from './series.js';
-import { listGenres } from './genres.js';
+import { listGenres, newGenre } from './genres.js';
 import { 
       listUsers, 
       listUser,
@@ -157,6 +157,7 @@ router.delete('/tv/:serie_id/season/:season_number/episode/:episode_number', req
 router.post('/tv/:serie_id/season/:season_id/episode', requireAdmin, catchErrors(newEpisode));
 
 router.get('/genres', catchErrors(listGenres));
+router.post('/genres', requireAdmin, catchErrors(newGenre));
 
 
 /*
@@ -164,7 +165,6 @@ router.get('/genres', catchErrors(listGenres));
 router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
 router.post('/tv/:id/season', requireAdmin, catchErrors(newSeason));
 
-router.post(/genres', requireAdmin, catchErrors(newGenre));
 
 
 // Series and users
