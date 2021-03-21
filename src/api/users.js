@@ -81,7 +81,7 @@ export async function listUsers(req, res) {
   }
   
   export async function currentUser(req, res) {
-    const { user: { id } = {} } = req;
+    const { id } = req.user;
 
     const user = await findById(id);
 
