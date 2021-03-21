@@ -140,7 +140,6 @@ router.patch('/users/me', requireAuth, catchErrors(updateCurrentUser));
 router.get('/users', requireAdmin, catchErrors(listUsers));
 router.get('/users/:id', requireAdmin, catchErrors(listUser));
 router.patch('/users/:id', requireAdmin, catchErrors(updateUser));
-//Ekki að virka veit ekki afhverju
 
 router.get('/tv', catchErrors(listSeries));
 router.post('/tv', catchErrors(newSeries));//requireAdmin, catchErrors(newSeries));
