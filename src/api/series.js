@@ -111,13 +111,12 @@ export async function listSeries(req, res) {
 
 async function validateSeries(
   {
-    name, airDate, inProduction, tagline, image, description, language, network, homepage
+    name, airDate, inProduction, tagline, description, language, network, homepage
   } = {},
   patching = false,
   id = null,
 ) {
   const validation = [];
-
   // Name validation
   if (!patching || name || isEmpty(name)) {
     if (!isNotEmptyString(name, { min: 1, max: 128 })) {
@@ -166,7 +165,7 @@ async function validateSeries(
 
   // Tagline validation
   if (!patching || tagline || isEmpty(tagline)) {
-    if (!isString(tagline)) {
+    if (tagline !== null && !isString(tagline)) {
       validation.push({
         msg: 'tagline must be a string',
         param: 'tagline',
@@ -176,8 +175,8 @@ async function validateSeries(
   }
 
   // Description validation
-  if (!patching || description || isEmpty(description)) {
-    if (!isString(description)) {
+  if (!patching || description !== null) {
+    if (description !== null && !isString(description)) {
       validation.push({
         msg: 'description must be a string',
         param: 'description',
@@ -186,33 +185,38 @@ async function validateSeries(
     }
   }
 
-  /*
-  if (!patching || category || isEmpty(category)) {
-    let categoryInvalid = false;
-
-    if (toPositiveNumberOrDefault(category, 0) > 2147483647) {
-      categoryInvalid = true;
-    } else if (toPositiveNumberOrDefault(category, 0) > 0) {
-      const cat = await query(
-        'SELECT id FROM categories WHERE id = $1',
-        [category],
-      );
-
-      if (cat.rows.length !== 1) {
-        categoryInvalid = true;
-      }
-    } else {
-      categoryInvalid = true;
-    }
-
-    if (categoryInvalid) {
+  // Language validation
+  if (!patching || language || isEmpty(language)) {
+    if (!isNotEmptyString(language, { min: 2, max: 2 })) {
       validation.push({
-        field: 'category',
-        error: 'Category does not exist',
+        msg: 'language must be a string of length 2',
+        param: 'language',
+        location: 'body',
       });
     }
   }
-  */
+
+  // Network validation
+  if (!patching || network !== null) {
+    if (network !== null && !isString(network)) {
+      validation.push({
+        msg: 'network must be a string',
+        param: 'network',
+        location: 'body',
+      });
+    }
+  }
+
+  // Homepage validation
+  if (!patching || homepage !== null) {
+    if (homepage !== null && !isString(homepage)) {
+      validation.push({
+        msg: 'homepage must be a string',
+        param: 'homepage',
+        location: 'body',
+      });
+    }
+  }
 
   return validation;
 }
@@ -242,7 +246,8 @@ async function withMulter(req, res, next, fn) {
 
 async function createSeriesWithImage(req, res, next) {
   const {
-    name, airDate, inProduction, tagline, image, description, language, network, homepage,
+    name, airDate, inProduction = null, tagline = null, image,
+    description = null, language, network = null, homepage = null,
   } = req.body;
 
   // file er tómt ef engri var uploadað
@@ -251,7 +256,7 @@ async function createSeriesWithImage(req, res, next) {
   const hasImage = Boolean(path && mimetype);
 
   const series = {
-    name, airDate, inProduction, tagline, image, description, language, network, homepage,
+    name, airDate, inProduction, tagline, description, language, network, homepage,
   };
 
   const validations = await validateSeries(series);
@@ -310,15 +315,14 @@ async function createSeriesWithImage(req, res, next) {
     xss(series.name),
     xss(series.airDate),
     xss(series.inProduction),
-    xss(series.tagline),
+    (series.tagline === null) ? series.tagline : xss(series.tagline),
     xss(series.image),
-    xss(series.description),
+    (series.description === null) ? series.description : xss(series.description),
     xss(series.language),
-    xss(series.network),
-    xss(series.homepage),
+    (series.network === null) ? series.network : xss(series.network),
+    (series.network === null) ? series.homepage : xss(series.network),
   ];
 
-  console.log(values);
   const result = await query(q, values);
 
   return res.status(201).json(result.rows[0]);
