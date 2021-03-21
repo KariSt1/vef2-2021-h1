@@ -1,6 +1,7 @@
 import multer from 'multer';
 import cloudinary from 'cloudinary';
 import xss from 'xss';
+import { isValid} from 'date-fns';
 import { query, pagedQuery } from '../utils/db.js';
 import { addPageMetadata } from '../utils/addPageMetadata.js';
 import { isInt, isNotEmptyString, isEmpty, lengthValidationError, isBoolean, isString } from '../utils/validation.js';
@@ -13,91 +14,91 @@ const MIMETYPES = [
 ];
 
 async function findSeasons(id, number) {
-    if (!isInt(id) && !isInt(number)) {
-      return null;
-    }
+  if (!isInt(id) && !isInt(number)) {
+    return null;
+  }
   
-    const seasons = await query(
-      `SELECT
+  const seasons = await query(
+    `SELECT
         id,name,air_date,overview,poster
       FROM
         seasons
       WHERE serie_id = $1 AND number = $2`,
-      [id,number],
-    );
+    [id,number],
+  );
   
-    if (seasons.rows.length !== 1) {
-      return null;
-    }
-  
-    return seasons.rows[0];
+  if (seasons.rows.length !== 1) {
+    return null;
   }
-
-  async function findEpisodes(id, number) {
-    if (!isInt(id) && !isInt(number)) {
-      return null;
-    }
   
-    const episodes = await query(
-      `SELECT
+  return seasons.rows[0];
+}
+
+async function findEpisodes(id, number) {
+  if (!isInt(id) && !isInt(number)) {
+    return null;
+  }
+  
+  const episodes = await query(
+    `SELECT
         name,number,air_date,overview
       FROM
         episodes
       WHERE serie_id = $1 AND season = $2 ORDER BY number `,
-      [id,number],
-    );
+    [id,number],
+  );
   
-    if (episodes.rows.length == 0) {
-      return null;
-    }
-  
-    return episodes.rows;
+  if (episodes.rows.length == 0) {
+    return null;
   }
+  
+  return episodes.rows;
+}
 
 async function deleteRow(id) {
-    const q = 'DELETE FROM seasons WHERE id = $1';
+  const q = 'DELETE FROM seasons WHERE id = $1';
   
-    return query(q, id);
-  }
+  return query(q, id);
+}
 
 export async function listSeasons(req, res) {
-    const { offset = 0, limit = 10 } = req.query;
-    const { id } = req.params;
+  const { offset = 0, limit = 10 } = req.query;
+  const { id } = req.params;
 
-    const seasons = await pagedQuery(
-        `SELECT
+  const seasons = await pagedQuery(
+    `SELECT
           id, name, number, air_date, overview, poster
         FROM
           seasons
         WHERE serie_id = $1 ORDER BY id`,
-        [id],
-        { offset, limit },
-      );
+    [id],
+    { offset, limit },
+  );
 
-    const seasonsWithPage = addPageMetadata(
-        seasons,
-        req.path,
-        { offset, limit, length: seasons.items.length },
-      );
-    
-      return res.json(seasonsWithPage);
+  const seasonsWithPage = addPageMetadata(
+    seasons,
+    req.path,
+    { offset, limit, length: seasons.items.length },
+  );
+
+  return res.json(seasonsWithPage);
 }
 
 export async function listSeason(req, res) {
-    const { id, number } = req.params;
+  const { id, number } = req.params;
 
-    const season = await findSeasons(id, number);
-    const episodes = await findEpisodes(id,number);
+  const season = await findSeasons(id, number);
+  const episodes = await findEpisodes(id,number);
   
-    if (!season) {
-      return res.status(404).json({ error: 'Season not found' });
-    }
-  
-    return res.json({
-      season: season,
-      episodes: episodes
-  });
+  if (!season) {
+    return res.status(404).json({ error: 'Season not found' });
   }
+  
+  return res.json({
+    season: season,
+    episodes: episodes
+  });
+}
 
 
 export async function deleteSeason(req, res) {
@@ -135,7 +136,7 @@ async function withMulter(req, res, next, fn) {
 
 async function validateSeasons(
   {
-    name, airDate, inProduction, tagline, description, language, network, homepage
+    name, number, airDate, overview, serie
   } = {},
   patching = false,
   id = null,
@@ -152,6 +153,17 @@ async function validateSeasons(
     }
   }
 
+  // number validation
+  if (!patching || number || isEmpty(number)) {
+    if (!isInt(number)) {
+      validation.push({
+        msg: 'number must be an integer ',
+        param: 'number',
+        location: 'body',
+      });
+    }
+  }
+
   // airDate validation
   if (!patching || airDate || isEmpty(airDate)) {
     if (!isValid(new Date(airDate))) {
@@ -163,80 +175,23 @@ async function validateSeasons(
     }
   }
 
-  // inProduction validation
-  if (!patching || inProduction || isEmpty(inProduction)) {
-    if (!inProduction) {
+  // overview validation
+  if (!patching || overview || isEmpty(overview)) {
+    if (overview !== null && !isString(overview)) {
       validation.push({
-        msg: 'inProduction is required',
-        param: 'inProduction',
-        location: 'body',
-      });
-    }
-    let booleanInProduction;
-    if (inProduction === 'true') {
-      booleanInProduction = true;
-    } else if (inProduction === 'false') {
-      booleanInProduction = false;
-    }
-    if (!isBoolean(booleanInProduction)) {
-      validation.push({
-        msg: 'inProduction must be a boolean',
-        param: 'inProduction',
+        msg: 'overview must be a string',
+        param: 'overview',
         location: 'body',
       });
     }
   }
 
-  // Tagline validation
-  if (!patching || tagline || isEmpty(tagline)) {
-    if (tagline !== null && !isString(tagline)) {
+  // serie validation
+  if (!patching || serie || isEmpty(serie)) {
+    if (!isNotEmptyString(serie, { min: 1, max: 128 })) {
       validation.push({
-        msg: 'tagline must be a string',
-        param: 'tagline',
-        location: 'body',
-      });
-    }
-  }
-
-  // Description validation
-  if (!patching || description !== null) {
-    if (description !== null && !isString(description)) {
-      validation.push({
-        msg: 'description must be a string',
-        param: 'description',
-        location: 'body',
-      });
-    }
-  }
-
-  // Language validation
-  if (!patching || language || isEmpty(language)) {
-    if (!isNotEmptyString(language, { min: 2, max: 2 })) {
-      validation.push({
-        msg: 'language must be a string of length 2',
-        param: 'language',
-        location: 'body',
-      });
-    }
-  }
-
-  // Network validation
-  if (!patching || network !== null) {
-    if (network !== null && !isString(network)) {
-      validation.push({
-        msg: 'network must be a string',
-        param: 'network',
-        location: 'body',
-      });
-    }
-  }
-
-  // Homepage validation
-  if (!patching || homepage !== null) {
-    if (homepage !== null && !isString(homepage)) {
-      validation.push({
-        msg: 'homepage must be a string',
-        param: 'homepage',
+        msg: `serie is required ${lengthValidationError(name, 1, 128)}`,
+        param: 'serie',
         location: 'body',
       });
     }
@@ -248,7 +203,7 @@ async function validateSeasons(
 async function createSeasonsWithImage(req, res, next) {
   const {
     name, number, airDate = null, overview = null,
-    serie, 
+    serie,
   } = req.body;
 
   // file er tómt ef engri var uploadað
@@ -266,8 +221,8 @@ async function createSeasonsWithImage(req, res, next) {
     if (!validateImageMimetype(mimetype)) {
       validations.push({
         field: 'image',
-        error: `Mimetype ${mimetype} is not legal. ` +
-               `Only ${MIMETYPES.join(', ')} are accepted`,
+        error: `Mimetype ${mimetype} is not legal. `
+        + `Only ${MIMETYPES.join(', ')} are accepted`,
       });
     }
   }
@@ -286,10 +241,13 @@ async function createSeasonsWithImage(req, res, next) {
     } catch (error) {
       // Skilum áfram villu frá Cloudinary, ef einhver
       if (error.http_code && error.http_code === 400) {
-        return res.status(400).json({ errors: [{
-          field: 'image',
-          error: error.message,
-        }] });
+        return res.status(400).json(
+          { errors: [{
+            field: 'image',
+            error: error.message,
+          }]
+          }
+        );
       }
 
       console.error('Unable to upload file to cloudinary');
@@ -314,14 +272,11 @@ async function createSeasonsWithImage(req, res, next) {
 `;
   const values = [
     xss(seasons.name),
+    xss(seasons.number),
     xss(seasons.airDate),
-    xss(seasons.inProduction),
-    (seasons.tagline === null) ? seasons.tagline : xss(seasons.tagline),
-    xss(seasons.image),
-    (seasons.description === null) ? seasons.description : xss(seasons.description),
-    xss(seasons.language),
-    (seasons.network === null) ? seasons.network : xss(seasons.network),
-    (seasons.network === null) ? seasons.homepage : xss(seasons.network),
+    (seasons.overview === null) ? seasons.overview : xss(seasons.overview),
+    xss(seasons.poster),
+    xss(seasons.serie),
   ];
 
   const result = await query(q, values);
