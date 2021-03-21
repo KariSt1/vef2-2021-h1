@@ -50,13 +50,6 @@ async function withMulter(req, res, next, fn) {
       return fn(req, res, next).catch(next);
     });
 }
-
-/*
-
-úr image.js skránni hans óla:
-
-*/
-
 // Geymum í minni niðurstöður úr því að lista allar myndir frá Cloudinary
 let cachedListImages = null;
 
