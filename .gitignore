@@ -9,6 +9,9 @@
 # production
 /build
 
+# temp folder for cloudinary
+/temp
+
 # misc
 .DS_Store
 .env.local
