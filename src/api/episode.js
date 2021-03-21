@@ -22,26 +22,27 @@ async function findEpisode(serie_id,season_number,episode_number) {
   
     return episode.rows[0];
   }
-  async function findSeasonId(season_number) {
-    if (!isInt(season_number)) {
-      return null;
-    }
-  
-    const season_id = await query(
-      `SELECT
-        id
-      FROM
-        seasons
-      WHERE number = $1`,
-      [season_number],
-    );
-  
-    console.log(season_id.rows[0].id);
-    return season_id.rows[0].id;
+
+
+async function findSeasonId(season_number) {
+  if (!isInt(season_number)) {
+    return null;
   }
+  
+  const season_id = await query(
+    `SELECT
+      id
+    FROM
+      seasons
+    WHERE number = $1`,
+    [season_number],
+  );
 
+  
+  return season_id.rows[0].id;
+}
 
-async function validateEpisode(name, number) {
+async function validateEpisode(name, number,serie_id) {
   const validations = [];
   if (!isNotEmptyString(name, { min: 1, max: 256 })) {
     validations.push({
@@ -55,6 +56,17 @@ async function validateEpisode(name, number) {
       field: 'number',
       error: 'number must be an integer larger than 0',
     });
+  }
+
+  const episode = await query(
+    'SELECT number FROM episodes WHERE number = $1 AND serie_id = $2',
+    [number,serie_id],
+  );
+
+  if (episode.rows.length > 0) {
+    const currentNr = episode.rows[0].number;
+    const error = `Episode nr ${currentNr} already exists.`;
+    return [{ error }];
   }
 
   return validations;
@@ -78,7 +90,7 @@ export async function newEpisode(req, res) {
     const { name,number, air_date, overview} = req.body;
   
     const season_id = await findSeasonId(season_number);
-    const validations = await validateEpisode(name, number);
+    const validations = await validateEpisode(name, number,season_number,serie_id);
   
     if (validations.length > 0) {
       return res.status(400).json({
