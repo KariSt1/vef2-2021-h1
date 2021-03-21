@@ -1,27 +1,29 @@
 import express from 'express';
 import { listSeason, listSeasons, deleteSeason } from './seasons.js';
 import { listEpisode, deleteEpisode, newEpisode } from './episode.js';
-<<<<<<< HEAD
-import { listSeries, listSingleSeries, newSeries, deleteSeries, updateSeries } from './series.js';
-=======
-import { listSeries, listSingleSeries, newSeries, deleteSeries, newSeriesRating } from './series.js';
->>>>>>> 15b26146cdfc0f733a38d06ba8a8c54dfe365759
+import {
+  listSeries,
+  listSingleSeries,
+  newSeries,
+  deleteSeries,
+  updateSeries,
+  newSeriesRating,
+} from './series.js';
 import { listGenres, newGenre } from './genres.js';
-import { 
-      listUsers, 
-      listUser,
-      updateUserRoute as updateUser,
-      currentUser,
-      updateCurrentUser
+import {
+  listUsers,
+  listUser,
+  updateUserRoute as updateUser,
+  currentUser,
+  updateCurrentUser,
 } from './users.js';
 import { requireAuth, checkUserIsAdmin } from '../authentication/auth.js';
+import catchErrors from '../utils/catchErrors.js';
 
 const requireAdmin = [
   requireAuth,
   checkUserIsAdmin,
 ];
-
-import catchErrors from '../utils/catchErrors.js';
 
 export const router = express.Router();
 
@@ -149,7 +151,7 @@ router.patch('/users/:id', requireAdmin, catchErrors(updateUser));
 router.get('/tv', catchErrors(listSeries));
 router.post('/tv', requireAdmin, catchErrors(newSeries));
 router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
-//Vantar average rating og ratingcount
+// Vantar average rating og ratingcount
 router.get('/tv/:id', catchErrors(listSingleSeries));
 router.delete('/tv/:id', requireAdmin, catchErrors(deleteSeries));
 
@@ -165,7 +167,6 @@ router.get('/genres', catchErrors(listGenres));
 router.post('/genres', requireAdmin, catchErrors(newGenre));
 
 router.post('/tv/:id/rate', requireAuth, catchErrors(newSeriesRating));
-
 
 /*
 // Series
