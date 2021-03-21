@@ -67,6 +67,7 @@ async function insertSeries() {
             await insertGenre(genre);
             await query(linkQuery, [seriesID, genre]);
           });
+          await query("SELECT nextval(pg_get_serial_sequence('tvshows', 'id')");
         } catch (e) {
           console.error(e);
         }
