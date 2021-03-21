@@ -19,13 +19,14 @@ async function findById(id) {
 
   const series = await query(
     `SELECT
-      id,name,air_date,inProduction,tagline,image,
-      description,language,network,homepage
-    FROM
-      tvshows
-    WHERE id = $1`,
-    [id],
-  );
+      tvshows.id,tvshows.name,tvshows.air_date,tvshows.inProduction,
+      tvshows.tagline,tvshows.image,tvshows.description,tvshows.language,
+      tvshows.network,tvshows.homepage, AVG(users_tvshows.rating) AS averageRating, COUNT(users_tvshows.rating) AS ratingcount
+    FROM tvshows
+    LEFT JOIN users_tvshows ON tvshows.id = users_tvshows.tvshow_id
+    WHERE tvshows.id = $1
+    GROUP BY tvshows.id
+`, [id]);
 
   if (series.rows.length !== 1) {
     return null;
