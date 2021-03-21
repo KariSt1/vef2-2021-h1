@@ -24,7 +24,6 @@ async function findById(id) {
   return series.rows[0];
 }
 
-/*
 async function findSeasons(id) {
   if (!isInt(id)) {
     return null;
@@ -32,20 +31,15 @@ async function findSeasons(id) {
 
   const seasons = await query(
     `SELECT
-      name,number,air_date,overview,poster
+      name,air_date,overview,poster
     FROM
       seasons
-    WHERE serie_id = $1`,
+    WHERE serie_id = $1 ORDER BY number `,
     [id],
   );
 
-  if (seasons.rows.length !== 1) {
-    return null;
-  }
-
-  return seasons.rows[0];
+  return seasons.rows;
 }
-*/
 
 export async function listSeries(req, res) {
   const { offset = 0, limit = 10 } = req.query;
@@ -73,13 +67,16 @@ export async function listSingleSeries(req, res) {
   const { id } = req.params;
   
   const singleSeries = await findById(id);
- // const seasons = await findSeasons(id);
+  const seasons = await findSeasons(id);
 
   if (!singleSeries) {
     return res.status(404).json({ error: 'Series not found' });
   }
 
-  return res.json(singleSeries);
+  return res.json({
+    items: singleSeries,
+    seasons: seasons
+});
 }
 
 export async function updateSeries(req, res) {
