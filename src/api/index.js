@@ -180,7 +180,6 @@ router.delete('/tv/:id/rate', requireAuth, catchErrors(deleteSeriesRating));
 router.post('/tv/:id/season', requireAdmin, catchErrors(newSeason));
 
 // Series and users
-router.delete('/tv/:id/rate', requireAuth, catchErrors(deleteSeriesRating));
 router.patch('/tv/:id/state', requireAuth, catchErrors(updateSeriesState));
 router.delete('/tv/:id/state', requireAuth, catchErrors(deleteSeriesState));
 router.get('/tv/:id', requireAuth, )
