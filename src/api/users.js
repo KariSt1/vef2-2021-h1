@@ -82,9 +82,10 @@ export async function listUsers(req, res) {
   
   export async function currentUser(req, res) {
     const { user: { id } = {} } = req;
-  
+
     const user = await findById(id);
-  
+
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }

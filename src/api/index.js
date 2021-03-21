@@ -1,6 +1,6 @@
 import express from 'express';
 import { listSeason, listSeasons, deleteSeason } from './seasons.js';
-import { listEpisode, deleteEpisode } from './episode.js';
+import { listEpisode, deleteEpisode, newEpisode } from './episode.js';
 import { listSeries, listSingleSeries, newSeries, deleteSeries } from './series.js';
 import { listGenres } from './genres.js';
 import { 
@@ -138,7 +138,7 @@ router.get('/', indexRoute);
 router.get('/users', requireAdmin, catchErrors(listUsers));
 router.get('/users/:id', requireAdmin, catchErrors(listUser));
 router.patch('/users/:id', requireAdmin, catchErrors(updateUser));
-//Fæ forbidden þótt ég sé logguð inn sé ekki afhverju
+//Ekki að virka veit ekki afhverju
 router.get('/users/me', requireAuth, catchErrors(currentUser));
 router.patch('/users/me', requireAuth, catchErrors(updateCurrentUser));
 
@@ -152,16 +152,16 @@ router.get('/tv/:id/season/:number', catchErrors(listSeason));
 router.delete('/tv/:id/season/:number', requireAdmin, catchErrors(deleteSeason));
 
 router.get('/tv/:serie_id/season/:season_number/episode/:episode_number', catchErrors(listEpisode));
+router.delete('/tv/:serie_id/season/:season_number/episode/:episode_number', requireAdmin, catchErrors(deleteEpisode));
+router.post('/tv/:serie_id/season/:season_id/episode', requireAdmin, catchErrors(newEpisode));
 
 router.get('/genres', catchErrors(listGenres));
 
-router.delete('/tv/:serie_id/season/:season_number/episode/:episode_number', requireAdmin, catchErrors(deleteEpisode));
 
 /*
 // Series
 router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
 router.post('/tv/:id/season', requireAdmin, catchErrors(newSeason));
-router.post('/tv/:id/season/:id/episode', requireAdmin, catchErrors(newEpisode));
 
 router.post(/genres', requireAdmin, catchErrors(newGenre));
 
