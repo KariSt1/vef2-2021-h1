@@ -67,7 +67,6 @@ async function insertSeries() {
             await insertGenre(genre);
             await query(linkQuery, [seriesID, genre]);
           });
-          await query("SELECT nextval(pg_get_serial_sequence('tvshows', 'id')");
         } catch (e) {
           console.error(e);
         }
@@ -177,11 +176,12 @@ async function create() {
   setTimeout(async () => {
     console.log('Seasons');
     await insertSeasons();
-  }, 6000);
+  }, 9000);
   setTimeout(async () => {
     console.log('Episodes');
     await insertEpisodes();
-  }, 12000);
+    await query("SELECT setval(pg_get_serial_sequence('tvshows', 'id'), 20, true)");
+  }, 15000);
 
   //await end();
 
