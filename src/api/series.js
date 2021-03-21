@@ -488,15 +488,18 @@ export async function updateSeries(req, res, next) {
 export async function deleteSeries(req, res) {
   const { id } = req.params;
 
-  const q = 'DELETE FROM seasons WHERE id = $1';
+  const q = 'DELETE FROM tvshows WHERE id = $1';
 
   await query(q, [id]);
+
+  return res.json({});
 }
 
 export async function newSeriesRating(req, res) {
   const { id } = req.params;
   const  user  = req.user.id;
   const { rating } = req.body;
+  
 
   console.log(user);
   const validations = await findIfRatingExists(user,id);
@@ -517,10 +520,17 @@ export async function updateSeriesRating(req, res) {
   const  user  = req.user.id;
   const { rating } = req.body;
 
-
 }
 
 export async function deleteSeriesRating(req, res) {
+  const { id } = req.params;
+  const  user  = req.user.id;
+
+  const q = 'DELETE FROM users_tvshows WHERE tvshow_id = $1 AND user_id = $2';
+
+  await query(q, [id,user]);
+
+  return res.json({});
 
 }
 
