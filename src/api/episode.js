@@ -1,5 +1,6 @@
 import { query, pagedQuery } from '../utils/db.js';
-import { isInt, isNotEmptyString, lengthValidationError } from '../utils/validation.js';
+import { isInt, isNotEmptyString, lengthValidationError, isEmpty,isString } from '../utils/validation.js';
+import { isValid } from 'date-fns';
 import xss from 'xss';
 
 async function findEpisode(serie_id,season_number,episode_number) {
@@ -42,21 +43,53 @@ async function findSeasonId(season_number) {
   return season_id.rows[0].id;
 }
 
-async function validateEpisode(name, number,serie_id) {
-  const validations = [];
-  if (!isNotEmptyString(name, { min: 1, max: 256 })) {
-    validations.push({
-      field: 'name',
-      error: lengthValidationError(name, 1, 256),
-    });
-  }
+async function validateEpisode( name, number, air_date,overview,serie_id,
+    patching = false,
+    id = null,
+  ) {
+    const validation = [];
+    // Name validation
+    if (!patching || name || isEmpty(name)) {
+      if (!isNotEmptyString(name, { min: 1, max: 128 })) {
+        validation.push({
+          msg: `name is required ${lengthValidationError(name, 1, 128)}`,
+          param: 'name',
+          location: 'body',
+        });
+      }
+    }
 
-  if (!isInt(number)) {
-    validations.push({
-      field: 'number',
-      error: 'number must be an integer larger than 0',
-    });
-  }
+    if (!patching || number || isEmpty(number)) {
+      if (!isInt(number)) {
+        validation.push({
+          msg: `number must be an integer bigger than 0`,
+          param: 'number',
+          location: 'body',
+        });
+      }
+    }
+  
+    // airDate validation
+    if (!patching || air_date || isEmpty(air_date)) {
+      if (air_date !== null && !isValid(new Date(air_date))) {
+        validation.push({
+          msg: 'air_date must be a date',
+          param: 'air_date',
+          location: 'body',
+        });
+      }
+    }
+  
+    // Description validation
+    if (!patching || overview || isEmpty(overview)) {
+      if (overview !== null && !isString(overview)) {
+        validation.push({
+          msg: 'overview must be a string',
+          param: 'overview',
+          location: 'body',
+        });
+      }
+    }
 
   const episode = await query(
     'SELECT number FROM episodes WHERE number = $1 AND serie_id = $2',
@@ -69,7 +102,7 @@ async function validateEpisode(name, number,serie_id) {
     return [{ error }];
   }
 
-  return validations;
+  return validation;
 }
   
 
@@ -87,40 +120,32 @@ export async function listEpisode(req, res) {
 
 export async function newEpisode(req, res) {
     const { season_number,serie_id} = req.params;
-    const { name,number, air_date, overview} = req.body;
+    const { name,number, air_date=null, overview=null} = req.body;
   
     const season_id = await findSeasonId(season_number);
-    const validations = await validateEpisode(name, number,season_number,serie_id);
+    const validations = await validateEpisode(name, number, air_date,overview,serie_id);
   
     if (validations.length > 0) {
       return res.status(400).json({
         errors: validations,
       });
     }
-    const q = 'INSERT INTO episodes (name,number,season, saeason_id,serie_id) VALUES ($1,$2,$3,$4,$5) RETURNING id, name, number, air_date,overview,season_id,serie_id';
-    const qAir_date = 'INSERT INTO episodes (name,number,air_date,season,season_id,serie_id) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, name, number, air_date,overview,season_id,serie_id';
-    const qOverview = 'INSERT INTO episodes (name,number,overview,season,season_id,serie_id) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, name, number, air_date,overview,season_id,serie_id';
-    const qAll= 'INSERT INTO episodes (name,number,air_date,overview,season,season_id,serie_id) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id, name, number, air_date,overview,season_id,serie_id';
+
+    const q = 'INSERT INTO episodes (name,number,air_date,overview,season,season_id,serie_id) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id, name, number, air_date,overview,season_id,serie_id';
   
-    if (air_date === null && overview === null) {
-      const result = await query(q, [xss(name),number,season_number,season_id,serie_id]);
-      return res.status(201).json(result.rows[0]);
-    }
+    const values = [
+      xss(name),
+      xss(number),
+      (air_date === null) ? air_date : xss(air_date),
+      (overview === null) ? overview : xss(overview),
+      xss(season_number),
+      xss(season_id),
+      xss(serie_id),
+    ];
 
-    else if (air_date === null) {
-      const result = await query(qOverview, [xss(name),number,overview,season_number,season_id,serie_id]);
-      return res.status(201).json(result.rows[0]);
-    }
-
-    else if (overview === null) {
-      const result = await query(qAir_date, [xss(name),number,air_date,season_number,season_id,serie_id]);
-      return res.status(201).json(result.rows[0]);
-    }
-
-    else {
-        const result = await query(qAll, [xss(name),number,air_date,overview,season_number,season_id,serie_id]);
-        return res.status(201).json(result.rows[0]);
-    }
+    const result = await query(q, values);
+    return res.status(201).json(result.rows[0]);
+  
   
   }
 

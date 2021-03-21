@@ -82,7 +82,9 @@ CREATE TABLE users_tvshows
   CONSTRAINT user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT tvshow_id FOREIGN KEY (tvshow_id) REFERENCES tvshows(id) ON DELETE CASCADE,
   status stat,
-  rating INTEGER CHECK (rating >= 0 AND rating <= 5)
+  rating INTEGER CHECK (rating >= 0 AND rating <= 5),
+  created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp,
+  updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT current_timestamp
 );
 
 INSERT INTO users (username, email,password,admin) VALUES ('admin','admin@admin.com','$2b$11$vDqeEn8TAMgzLhJatyVipuKrqsYB1bzkEeYnf/xb5ApYlVwJgIrtG','true');
