@@ -153,7 +153,6 @@ router.patch('/users/:id', requireAdmin, catchErrors(updateUser));
 router.get('/tv', catchErrors(listSeries));
 router.post('/tv', requireAdmin, catchErrors(newSeries));
 router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
-// Vantar average rating og ratingcount
 router.get('/tv/:id', catchErrors(listSingleSeries));
 router.delete('/tv/:id', requireAdmin, catchErrors(deleteSeries));
 

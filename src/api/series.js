@@ -474,6 +474,7 @@ export async function newSeriesRating(req, res) {
   const { id } = req.params;
   const  user  = req.user.id;
   const { rating } = req.body;
+  
 
   console.log(user);
   const validations = await findIfRatingExists(user,id);
