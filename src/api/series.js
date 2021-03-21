@@ -458,7 +458,7 @@ export async function listSingleSeries(req, res) {
   }
 
   return res.json({
-    items: singleSeries,
+    series: singleSeries,
     genres: genres,
     seasons: seasons
 });
@@ -471,7 +471,9 @@ export async function updateSeries(req, res) {
 export async function deleteSeries(req, res) {
   const { id } = req.params;
 
-  const q = 'DELETE FROM seasons WHERE id = $1';
+  const q = 'DELETE FROM tvshows WHERE id = $1';
 
   await query(q, [id]);
+
+  return res.json({});
 }

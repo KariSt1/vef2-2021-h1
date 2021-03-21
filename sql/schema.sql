@@ -84,3 +84,5 @@ CREATE TABLE users_tvshows
   status stat,
   rating INTEGER CHECK (rating >= 0 AND rating <= 5)
 );
+
+INSERT INTO users (username, email,password,admin) VALUES ('admin','admin@admin.com','$2b$11$vDqeEn8TAMgzLhJatyVipuKrqsYB1bzkEeYnf/xb5ApYlVwJgIrtG','true');
