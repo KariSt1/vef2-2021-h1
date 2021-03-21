@@ -143,6 +143,7 @@ router.patch('/users/:id', requireAdmin, catchErrors(updateUser));
 
 router.get('/tv', catchErrors(listSeries));
 router.post('/tv', catchErrors(newSeries));//requireAdmin, catchErrors(newSeries));
+//Vantar average rating og ratingcount
 router.get('/tv/:id', catchErrors(listSingleSeries));
 router.delete('/tv/:id', requireAdmin, catchErrors(deleteSeries));
 
@@ -152,7 +153,6 @@ router.delete('/tv/:id/season/:number', requireAdmin, catchErrors(deleteSeason))
 
 router.get('/tv/:serie_id/season/:season_number/episode/:episode_number', catchErrors(listEpisode));
 router.delete('/tv/:serie_id/season/:season_number/episode/:episode_number', requireAdmin, catchErrors(deleteEpisode));
-//Þarf að tjekka hvort season number sé til þá skila null
 router.post('/tv/:serie_id/season/:season_number/episode', requireAdmin, catchErrors(newEpisode));
 
 router.get('/genres', catchErrors(listGenres));

@@ -383,3 +383,29 @@ export async function deleteSeries(req, res) {
 
   await query(q, [id]);
 }
+
+export async function newSeriesRating(req, res) {
+  const { id } = req.params;
+  const { rating } = req.body;
+
+}
+
+export async function updateSeriesRating(req, res) {
+
+}
+
+export async function deleteSeriesRating(req, res) {
+
+}
+
+export async function newSeriesState(req, res) {
+
+}
+
+export async function updateSeriesState(req, res) {
+
+}
+
+export async function deleteSeriesState(req, res) {
+
+}
