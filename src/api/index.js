@@ -153,7 +153,7 @@ router.delete('/tv/:id/season/:number', requireAdmin, catchErrors(deleteSeason))
 
 router.get('/tv/:serie_id/season/:season_number/episode/:episode_number', catchErrors(listEpisode));
 router.delete('/tv/:serie_id/season/:season_number/episode/:episode_number', requireAdmin, catchErrors(deleteEpisode));
-//Vinna í þessu
+//Þarf að tjekka hvort season number sé til þá skila null
 router.post('/tv/:serie_id/season/:season_number/episode', requireAdmin, catchErrors(newEpisode));
 
 router.get('/genres', catchErrors(listGenres));
