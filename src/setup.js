@@ -1,14 +1,37 @@
+/* eslint-disable no-console */
+/* eslint-disable import/no-unresolved */
 import fastcsv from 'fast-csv';
 import fs from 'fs';
 // eslint-disable-next-line import/no-unresolved
 import { readFile } from 'fs/promises';
 import { query, end, insertGenre } from './utils/db.js';
 import { requireEnv } from './utils/requireEnv.js';
+import { uploadImagesFromDisk } from './data';
 
 const schemaFile = './sql/schema.sql';
 const dropTablesFile = './sql/drop.sql';
 
-requireEnv(['DATABASE_URL']); // , 'CLOUDINARY_URL']);
+requireEnv(['DATABASE_URL', 'CLOUDINARY_URL']);
+
+const {
+  CLOUDINARY_URL: cloudinaryUrl,
+  IMAGE_FOLDER: imageFolder = './img',
+} = process.env;
+
+async function main() {
+  console.info(`Set uppp tengingu við Cloudinary á ${cloudinaryUrl}`);
+
+  // Fylki með myndum og slóðum á Cloudinary
+  let images = [];
+
+  // senda myndir á Cloudinary
+  try {
+    images = await uploadImagesFromDisk(imageFolder);
+    console.info(`Sendi ${images.length} myndir á Cloudinary`);
+  } catch (e) {
+    console.error('Villa við senda myndir á Cloudinary:', e.message);
+  }
+}
 
 async function insertSeries() {
   const stream = fs.createReadStream('./data/series.csv');
@@ -150,4 +173,8 @@ async function create() {
 
 create().catch((err) => {
   console.error('Error creating schema', err);
+});
+
+main().catch((err) => {
+  console.error(err);
 });
