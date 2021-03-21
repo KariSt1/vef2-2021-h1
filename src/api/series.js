@@ -185,8 +185,8 @@ async function validateSeries(
     }
   }
 
-  // Language validation
-  if (!patching || language || isEmpty(language)) {
+   // Language validation
+   if (!patching || language || isEmpty(language)) {
     if (!isNotEmptyString(language, { min: 2, max: 2 })) {
       validation.push({
         msg: 'language must be a string of length 2',
@@ -322,6 +322,7 @@ async function createSeriesWithImage(req, res, next) {
     (series.network === null) ? series.network : xss(series.network),
     (series.network === null) ? series.homepage : xss(series.network),
   ];
+
 
   const result = await query(q, values);
 
@@ -470,6 +471,9 @@ export async function updateSeriesRating(req, res) {
   const { user } = req.user.id;
   const { rating } = req.body;
 
+  const q = 'INSERT INTO users_tvshows (user_id,tvshow_id,rating) VALUES ($1,$2,$3) RETURNING user_id,rating,tvshow_id';
+  const result = await query(q, [user,id,rating]);
+  return res.status(201).json(result.rows[0]);
 }
 
 export async function deleteSeriesRating(req, res) {
