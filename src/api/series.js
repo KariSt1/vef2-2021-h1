@@ -1,6 +1,8 @@
+import multer from 'multer';
+import { parse, isValid, format } from 'date-fns';
 import { query, pagedQuery } from '../utils/db.js';
 import { addPageMetadata } from '../utils/addPageMetadata.js';
-import { isInt, isNotEmptyString, isEmpty, lengthValidationError } from '../utils/validation.js';
+import { isInt, isNotEmptyString, isEmpty, lengthValidationError, isBoolean } from '../utils/validation.js';
 
 const MIMETYPES = [
   'image/jpeg',
@@ -89,51 +91,39 @@ async function validateSeries(
 ) {
   const validation = [];
 
+  // Name validation
   if (!patching || name || isEmpty(name)) {
     if (!isNotEmptyString(name, { min: 1, max: 128 })) {
       validation.push({
-        field: 'name',
-        error: `name is required ${lengthValidationError(name, 1, 256)}`,
+        msg: `name is required ${lengthValidationError(name, 1, 128)}`,
+        param: 'name',
         location: 'body',
       });
     }
-
-    const titleExists = await query(
-      'SELECT id FROM products WHERE title = $1',
-      [title],
-    );
-
-    if (titleExists.rows.length > 0) {
-      const current = titleExists.rows[0].id;
-
-      if (patching && id && current === toPositiveNumberOrDefault(id, 0)) {
-        // we can patch our own title
-      } else {
-        const error = `Title already exists in product with id ${current}.`;
-        validation.push({
-          field: 'title',
-          error,
-          location: 'body',
-        });
-      }
-    }
   }
 
-  if (!patching || price || isEmpty(price)) {
-    if (toPositiveNumberOrDefault(price, 0) <= 0) {
+  // TODO DATE VALIDATION
+
+  // inProduction validation
+  if (!patching || inProduction || isEmpty(inProduction)) {
+    if(!inProduction) {
       validation.push({
-        field: 'price',
-        error: 'Price must be a positive integer',
+        msg: 'inProduction is required',
+        param: 'inProduction',
+        location: 'body',
       });
-    } else if (toPositiveNumberOrDefault(price, 0) > 2147483647) {
+    }
+    if (!isBoolean(inProduction)) {
       validation.push({
-        field: 'price',
-        error: 'Price can not be higher than 2147483647',
+        msg: 'inProduction must be a boolean',
+        param: 'inProduction',
+        location: 'body',
       });
     }
   }
 
-  if (!patching || description || isEmpty(description)) {
+  // Description validation
+  if (!patching) {
     if (!isNotEmptyString(description, { min: 1 })) {
       validation.push({
         field: 'description',
@@ -192,85 +182,6 @@ async function withMulter(req, res, next, fn) {
 
       return fn(req, res, next).catch(next);
     });
-}
-
-/* api */
-
-async function listProducts(req, res) {
-  const { offset = 0, limit = 10, search = '', category = '' } = req.query;
-
-  let where = '';
-  let values = [];
-
-  const hasSearch = isNotEmptyString(search);
-  const hasCategory = isInt(category) && category > 0;
-
-  // Búum til dýnamískt query eftir því hvort search eða category sent inn
-  if (hasSearch || hasCategory) {
-    const sparam = hasSearch ? '$1' : '';
-    const cparam = hasSearch ? '$2' : '$1';
-
-    const parts = [
-      hasSearch ?
-        `(
-          to_tsvector('english', p.title) @@
-          plainto_tsquery('english', ${sparam})
-          OR
-          to_tsvector('english', p.description) @@
-          plainto_tsquery('english', ${sparam})
-        )` : null,
-      hasCategory ?
-        `p.category_id = ${cparam}` : null,
-    ].filter(Boolean);
-
-    where = `WHERE ${parts.join(' AND ')}`;
-    values = [
-      hasSearch ? search : null,
-      hasCategory ? category : null,
-    ].filter(Boolean);
-  }
-
-  const q = `
-    SELECT
-      p.id, p.title, p.price, p.description, p.image, p.created, p.updated,
-      p.category_id, c.title as category_title
-    FROM
-      products AS p
-    LEFT JOIN
-      categories AS c
-    ON
-      p.category_id = c.id
-    ${where}
-    ORDER BY
-      p.updated DESC`;
-
-  debug('Products query', q, values);
-
-  const products = await pagedQuery(
-    q,
-    values,
-    { offset, limit },
-  );
-
-  const productsWithPage = addPageMetadata(
-    products,
-    req.path,
-    { offset, limit, length: products.items.length },
-  );
-
-  return res.json(productsWithPage);
-}
-
-async function listProduct(req, res) {
-  const { id } = req.params;
-
-  const product = await getProduct(id);
-
-  if (!product) {
-    return res.status(404).json({ error: 'Product not found' });
-  }
-
-  return res.json(product);
 }
 
 async function createProductWithImage(req, res, next) {
@@ -349,7 +260,7 @@ async function createProductWithImage(req, res, next) {
   return res.status(201).json(result.rows[0]);
 }
 
-async function updateProductWithImage(req, res, next) {
+async function updateSeriesWithImage(req, res, next) {
   const { id } = req.params;
   const { title, price, description, category } = req.body;
 
@@ -360,7 +271,7 @@ async function updateProductWithImage(req, res, next) {
 
   const product = { title, price, description, category };
 
-  const validations = await validateProduct(product, true, id);
+  const validations = await validateSeries(product, true, id);
 
   if (hasImage) {
     if (!validateImageMimetype(mimetype)) {
@@ -434,16 +345,13 @@ async function updateProductWithImage(req, res, next) {
 }
 
 async function createProduct(req, res, next) {
-  return withMulter(req, res, next, createProductWithImage);
+  return withMulter(req, res, next, createSeriesWithImage);
 }
 
-export async function newSeries(req, res) {
-  const { name, airDate, genres,
-    inProduction, tagline, image,
-    description, language, network, homepage
-  } = req.body;
-  console.log();
-  res.json({test: 'wow'});
+export async function newSeries(req, res) {  
+  const date = isValid('2021-01-15');
+  console.log(date);
+  
 }
 
 export async function listSingleSeries(req, res) {
@@ -458,7 +366,7 @@ export async function listSingleSeries(req, res) {
   }
 
   return res.json({
-    series: singleSeries,
+    items: singleSeries,
     genres: genres,
     seasons: seasons
 });
@@ -471,9 +379,7 @@ export async function updateSeries(req, res) {
 export async function deleteSeries(req, res) {
   const { id } = req.params;
 
-  const q = 'DELETE FROM tvshows WHERE id = $1';
+  const q = 'DELETE FROM seasons WHERE id = $1';
 
   await query(q, [id]);
-
-  return res.json({});
 }
