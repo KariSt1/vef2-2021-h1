@@ -2,6 +2,7 @@ import {
     validateUser,
     updateUser,
     findById,
+    findByUsername
   } from '../authentication/users.js';
   
   import { query, pagedQuery } from '../utils/db.js';
@@ -81,10 +82,9 @@ export async function listUsers(req, res) {
   }
   
   export async function currentUser(req, res) {
-    const { user: { id } = {} } = req;
+   // const { user: { id } = {} } = req;
 
-    const user = await findById(id);
-
+    const user = await findById(req.user.id);
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
