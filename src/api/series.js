@@ -77,13 +77,13 @@ async function findIfRatingExists(user, id, rating,patching = false) {
 
   const series = await query(
     `SELECT
-      rating, user_id, tvshow_id
+      rating
     FROM users_tvshows
     INNER JOIN users ON users.id = users_tvshows.user_id
     WHERE users_tvshows.user_id = $1 AND users_tvshows.tvshow_id = $2
 `, [user,id]);
 
-  if (series.rows.length > 0) {
+  if (series.rows[0] !== undefined && series.rows[0].rating) {
     validations.push({
       msg: `already exists`,
       param: 'id',
@@ -134,7 +134,8 @@ async function findIfStateExists(user, id) {
 `, [user,id]);
 
   let errors = [];
-  if (series.rows.length > 0) {
+ 
+  if (series.rows[0] !== undefined ) {
     errors.push({
       msg: 'already exists',
       param: 'state',
@@ -555,7 +556,7 @@ export async function updateSeriesRating(req, res) {
       errors: validations,
     });
   }
-  
+
   const q = 'UPDATE users_tvshows SET rating = $1 WHERE tvshow_id = $2 AND user_id = $3 RETURNING user_id,rating,tvshow_id';
   const result = await query(q, [rating,xss(id),xss(user)]);
   return res.status(201).json(result.rows[0]);

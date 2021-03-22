@@ -180,8 +180,6 @@ router.patch('/tv/:id/state', requireAuth, catchErrors(updateSeriesState));
 
 /*
 // Series
-
-
 // Series and users
 
 router.delete('/tv/:id/state', requireAuth, catchErrors(deleteSeriesState));
