@@ -69,7 +69,7 @@ async function findGenres(id) {
   return genres.rows;
 }
 
-async function findIfRatingExists(user, id) {
+async function findIfRatingExists(user, id, rating,patching = false) {
   const validations = [];
   if (!isInt(id)) {
     return null;
@@ -84,8 +84,37 @@ async function findIfRatingExists(user, id) {
 `, [user,id]);
 
   if (series.rows.length > 0) {
-    const error = `Rating by this user already exists.`;
-    return [{ error }];
+    validations.push({
+      msg: `already exists`,
+      param: 'id',
+      location: 'params',
+  });
+  }
+
+  if (!patching || rating || isEmpty(rating)) {
+    if (!isInt(rating) || rating < 0 || rating > 5) {
+      validations.push({
+        msg: `rating must be an integer, one of 0, 1, 2, 3, 4, 5`,
+        param: 'rating',
+        location: 'body',
+      });
+    }
+  }
+
+  return validations;
+}
+
+async function validateRating(rating,patching = false) {
+  const validations = [];
+
+  if (!patching || rating || isEmpty(rating)) {
+    if (!isInt(rating) || rating < 0 || rating > 5) {
+      validations.push({
+        msg: `rating must be an integer, one of 0, 1, 2, 3, 4, 5`,
+        param: 'rating',
+        location: 'body',
+      });
+    }
   }
 
   return validations;
@@ -495,19 +524,13 @@ export async function deleteSeries(req, res) {
   return res.json({});
 }
 
-async function validateRating( user,rating,
-  patching = false,
-  id = null,
-) {
-
-}
 
 export async function newSeriesRating(req, res) {
   const { id } = req.params;
   const  user  = req.user.id;
   const { rating } = req.body;
 
-  const validations = await findIfRatingExists(user,id);
+  const validations = await findIfRatingExists(user,id,rating);
 
   if (validations.length > 0) {
     return res.status(400).json({
@@ -515,9 +538,9 @@ export async function newSeriesRating(req, res) {
     });
   }
 
-    const q = 'INSERT INTO users_tvshows (user_id,tvshow_id,rating) VALUES ($1,$2,$3) RETURNING user_id,rating,tvshow_id';
-    const result = await query(q, [xss(user),xss(id),xss(rating)]);
-    return res.status(201).json(result.rows[0]);
+  const q = 'INSERT INTO users_tvshows (user_id,tvshow_id,rating) VALUES ($1,$2,$3) RETURNING user_id,rating,tvshow_id';
+  const result = await query(q, [xss(user),xss(id),xss(rating)]);
+  return res.status(201).json(result.rows[0]);
 }
 
 export async function updateSeriesRating(req, res) {
@@ -525,8 +548,16 @@ export async function updateSeriesRating(req, res) {
   const  user  = req.user.id;
   const { rating } = req.body;
 
+  const validations = await validateRating(rating);
+
+  if (validations.length > 0) {
+    return res.status(400).json({
+      errors: validations,
+    });
+  }
+  
   const q = 'UPDATE users_tvshows SET rating = $1 WHERE tvshow_id = $2 AND user_id = $3 RETURNING user_id,rating,tvshow_id';
-  const result = await query(q, [xss(rating),xss(id),xss(user)]);
+  const result = await query(q, [rating,xss(id),xss(user)]);
   return res.status(201).json(result.rows[0]);
 
 }

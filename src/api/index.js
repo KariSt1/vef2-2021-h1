@@ -183,9 +183,6 @@ router.patch('/tv/:id/state', requireAuth, catchErrors(updateSeriesState));
 
 
 // Series and users
-router.post('/tv/:id/state', requireAuth, catchErrors(newSeriesState));
-
-router.patch('/tv/:id/state', requireAuth, catchErrors(updateSeriesState));
 
 router.delete('/tv/:id/state', requireAuth, catchErrors(deleteSeriesState));
 router.get('/tv/:id', requireAuth, )
