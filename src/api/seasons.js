@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 import multer from 'multer';
 import cloudinary from 'cloudinary';
 import xss from 'xss';
