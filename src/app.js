@@ -7,7 +7,7 @@ import { cors } from './utils/cors.js';
 
 dotenv.config();
 
-requireEnv(['DATABASE_URL']); // , 'CLOUDINARY_URL', 'JWT_SECRET']);
+requireEnv(['DATABASE_URL', 'CLOUDINARY_URL', 'JWT_SECRET']);
 
 const {
   PORT: port = 3000,
