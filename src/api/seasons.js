@@ -284,7 +284,7 @@ async function createSeasonsWithImage(req, res, next, id) {
     xss(seasons.serie_id),
   ];
 
-  const result = await query(q, values);
+  const result = await query(q, [values, xss(id)]);
 
   return res.status(201).json(result.rows[0]);
 }
