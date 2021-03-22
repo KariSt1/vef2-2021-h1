@@ -200,10 +200,14 @@ async function validateSeasons(
   return validation;
 }
 
-async function createSeasonsWithImage(req, res, next) {
+async function createSeasonsWithImage(req, res, next, id) {
+  if (!isInt(id)) {
+    return null;
+  }
+
   const {
     name, number, airDate = null, overview = null,
-    serie,
+    serie, serieId,
   } = req.body;
 
   // file er tómt ef engri var uploadað
@@ -212,7 +216,7 @@ async function createSeasonsWithImage(req, res, next) {
   const hasImage = Boolean(path && mimetype);
 
   const seasons = {
-    name, number, airDate, overview, serie,
+    name, number, airDate, overview, serie, serieId,
   };
 
   const validations = await validateSeasons(seasons);
@@ -265,7 +269,7 @@ async function createSeasonsWithImage(req, res, next) {
   const q = `
     INSERT INTO
       seasons
-      (name, number, air_date, overview, poster, serie)
+      (name, number, air_date, overview, poster, serie, serie_id)
     VALUES
       ($1, $2, $3, $4, $5, $6)
     RETURNING id, name, air_date, overview, poster, serie, serie_id
@@ -277,6 +281,7 @@ async function createSeasonsWithImage(req, res, next) {
     (seasons.overview === null) ? seasons.overview : xss(seasons.overview),
     xss(seasons.poster),
     xss(seasons.serie),
+    xss(seasons.serie_id),
   ];
 
   const result = await query(q, values);
@@ -285,5 +290,7 @@ async function createSeasonsWithImage(req, res, next) {
 }
 
 export async function newSeasons(req, res, next) {
-  return withMulter(req, res, next, createSeasonsWithImage);
+  const { id } = req.params;
+
+  return withMulter(req, res, next, createSeasonsWithImage, id);
 }
