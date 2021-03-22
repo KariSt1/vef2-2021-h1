@@ -530,15 +530,10 @@ export async function newSeriesRating(req, res) {
   const { id } = req.params;
   const  user  = req.user.id;
   const { rating } = req.body;
-<<<<<<< HEAD
-
 
   const validations = await findIfRatingExists(user,id,rating);
 
-=======
 
-  const validations = await findIfRatingExists(user,id,rating);
->>>>>>> 3da4ce91c58693bfdc69208bac9f2d4633de53d5
 
   if (validations.length > 0) {
     return res.status(400).json({
