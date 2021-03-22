@@ -21,7 +21,7 @@ async function findById(id) {
     `SELECT
       tvshows.id,tvshows.name,tvshows.air_date,tvshows.inProduction,
       tvshows.tagline,tvshows.image,tvshows.description,tvshows.language,
-      tvshows.network,tvshows.homepage, AVG(users_tvshows.rating) AS averageRating, COUNT(users_tvshows.rating) AS ratingcount
+      tvshows.network,tvshows.homepage, FLOOR(AVG(users_tvshows.rating)) AS averageRating, COUNT(users_tvshows.rating) AS ratingcount
     FROM tvshows
     LEFT JOIN users_tvshows ON tvshows.id = users_tvshows.tvshow_id
     WHERE tvshows.id = $1
@@ -470,13 +470,18 @@ export async function deleteSeries(req, res) {
   return res.json({});
 }
 
+async function validateRating( user,rating,
+  patching = false,
+  id = null,
+) {
+
+}
+
 export async function newSeriesRating(req, res) {
   const { id } = req.params;
   const  user  = req.user.id;
   const { rating } = req.body;
-  
 
-  console.log(user);
   const validations = await findIfRatingExists(user,id);
 
   if (validations.length > 0) {
@@ -486,7 +491,7 @@ export async function newSeriesRating(req, res) {
   }
 
     const q = 'INSERT INTO users_tvshows (user_id,tvshow_id,rating) VALUES ($1,$2,$3) RETURNING user_id,rating,tvshow_id';
-    const result = await query(q, [user,id,rating]);
+    const result = await query(q, [xss(user),xss(id),xss(rating)]);
     return res.status(201).json(result.rows[0]);
 }
 
@@ -494,6 +499,10 @@ export async function updateSeriesRating(req, res) {
   const { id } = req.params;
   const  user  = req.user.id;
   const { rating } = req.body;
+
+  const q = 'UPDATE users_tvshows SET rating = $1 WHERE tvshow_id = $2 AND user_id = $3 RETURNING user_id,rating,tvshow_id';
+  const result = await query(q, [xss(rating),xss(id),xss(user)]);
+  return res.status(201).json(result.rows[0]);
 
 }
 
@@ -514,6 +523,13 @@ export async function newSeriesState(req, res) {
 }
 
 export async function updateSeriesState(req, res) {
+  const { id } = req.params;
+  const  user  = req.user.id;
+  const { status } = req.body;
+
+  const q = 'UPDATE users_tvshows SET status = $1 WHERE tvshow_id = $2 AND user_id = $3 RETURNING user_id,status,tvshow_id';
+  const result = await query(q, [xss(status),xss(id),xss(user)]);
+  return res.status(201).json(result.rows[0]);
 
 }
 
