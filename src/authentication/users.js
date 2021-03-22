@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 import bcrypt from 'bcrypt';
 import xss from 'xss';
 
@@ -9,7 +10,7 @@ import {
   toPositiveNumberOrDefault,
   lengthValidationError,
 } from '../utils/validation.js';
-import { query, conditionalUpdate } from'../utils/db.js';
+import { query, conditionalUpdate } from '../utils/db.js';
 
 const {
   BCRYPT_ROUNDS: bcryptRounds = 11,
@@ -60,7 +61,7 @@ export async function validateUser(
   if (!patching) {
     if (!isNotEmptyString(username, { min: 3, max: 32 })) {
       validations.push({
-        msg: 'username is required, ' + lengthValidationError(username, 3, 32),
+        msg: `username is required, ${lengthValidationError(username, 3, 32)}`,
         param: 'username',
         location: 'body',
       });
@@ -75,12 +76,11 @@ export async function validateUser(
       });
     }
   }
-  
   if (!patching || email || isEmpty(email)) {
     if (!isNotEmptyString(email, { min: 1, max: 64 })) {
       validations.push({
         field: 'email',
-        error: lengthValidationError(email,1, 64),
+        error: lengthValidationError(email, 1, 64),
       });
     }
 
