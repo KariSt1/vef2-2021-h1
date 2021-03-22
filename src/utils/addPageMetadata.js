@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import { toPositiveNumberOrDefault } from './validation.js';
 
 const {
@@ -19,6 +20,7 @@ export function addPageMetadata(
   const limitAsNumber = toPositiveNumberOrDefault(limit, 10);
   const lengthAsNumber = toPositiveNumberOrDefault(length, 0);
 
+  // eslint-disable-next-line prefer-object-spread
   const newObj = Object.assign({}, obj);
 
   const url = new URL(path, baseUrl || `http://${host}`);
