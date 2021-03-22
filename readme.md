@@ -1,5 +1,110 @@
 # Vefforritun 2, 2021, hópverkefni 1
 
+## Heroku
+Verkefnið er keyrandi á https://vef2-2021-h1-hopur5.herokuapp.com/
+
+## Umhverfisbreytur
+
+Eftirfarandi breyta er krafist:
+
+* `DATABASE_URL`
+  * Slóð á gagnagrunn með auðkenningu
+* `CLOUDINARY_URL`
+  * Slóð á Cloudinary uppsetningu með auðkenningu
+* `JWT_SECRET`
+  * Langur, handahófskenndur strengur fyrir leyndarmál sem notað er fyrir JWT token
+
+Eftirfarandi breytur eru valkvæmar:
+
+* `HOST`
+  * Gildi sem notað er til að útbúa slóð á vefþjón
+  * Sjálfgefið `127.0.0.1`
+* `PORT`
+  * Gildi fyrir port sem forrit keyrir á
+  * Sjálfgefið `3000`
+* `BASE_URL`
+  * Gildi fyrir slóð á vefþjón, á forminu `https://example.org`
+  * Notað fyrir lýsigögn (paging) fyrir síður
+  * Sjálfgefið óskilgreint
+* `JWT_TOKEN_LIFETIME`
+  * Hversu lengi JWT token er gildur
+  * Sjálfgefið klukkutími eða `60 * 60` sekúndur
+* `BCRYPT_ROUNDS`
+  * Hversu oft á að hasha bcryptuð lykilorð
+  * Sjálfgefið `11`
+* `DEBUG`
+  * Hvort birta eigi auka debug gögn í keyrslu
+  * Sjálfgefið `false`
+* `IMAGE_FOLDER`
+  * Mappa með myndum fyrir gervivörur
+  * Sjálfgefið `./data/img`
+
+## Uppsetning
+
+1. Búa til gagnagrunn, t.d. `createdb vef2-2021-h1`
+2. Búa til Cloudinary aðgang
+3. Afrita `.env_example` í `.env` og setja upplýsingar fyrir
+  a. Gagnagrunn
+  b. Cloudinary
+4. Keyra `npm run setup` til að:
+  a. Útbúa gagnagrunn og fylla af gögnum í gefnum csv skrám
+  b. Færa allar myndir úr `./data/img` í Cloudinary
+  c. Útbúa grunn notendur
+
+```bash
+createdb vef2-2021-h1
+cp .env_example .env # Stilla breytur sem er krafist
+npm install
+npm test
+npm run setup
+npm run dev
+```
+
+### Dæmi um köll í vefþjónustu
+* `/tv`
+    * `GET` skilar síðum af sjónvarpsþáttum með grunnupplýsingum
+    * `POST` býr til nýjan sjónvarpsþátt, aðeins ef notandi er stjórnandi. Parametrar:
+        * name: "Stranger Things"
+        * airDate: "2020-05-04"
+        * inProduction: true (má sleppa)
+        * tagline: "It only gets stranger…"
+        * image (jpg, png eða gif skrá)
+        * description: "When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces, and one strange little girl." (má sleppa)
+        * language: "en"
+        * network: "Netflix" (má sleppa)
+        * homepage: "https://www.netflix.com/title/80057281" (má sleppa)
+* `/users/login`
+    * `POST` með netfangi og lykilorði skilar token ef gögn rétt. Parametrar:
+        * username: "admin"
+        * password: "1234567890" 
+* `/tv/3/rate`
+    * `POST`, skráir einkunn innskráðs notanda á sjónvarpsþætti, aðeins fyrir innskráða notendur. Parametrar:
+        * rating: 4
+    * `PATCH`, uppfærir einkunn innskráðs notanda á sjónvarpsþætti. Parametrar
+        * rating: 3
+    * `DELETE`, eyðir einkunn innskráðs notanda á sjónvarpsþætti
+
+### Notendur
+
+* Stjórnandi með notandanafn `admin`, lykilorð `1234567890`
+* Ekki stjórnandi með notandanafn `nonni`, lykilorð `1234567890`
+  * Á pantanir og körfu
+
+### Hópmeðlimir
+* Anna María Steingrímsdóttir
+  * HÍ netfang: ams58@hi.is
+  * Github notendanafn: annamaria99
+* Guðlaug Agnes Kristjánsdóttir
+  * HÍ netfang: gak16@hi.is
+  * Github notendanafn: gudlaugagnes
+* Kári Steinn Aðalsteinsson
+  * HÍ netfang: ksa13@hi.is
+  * Github notendanafn: KariSt1
+
+---
+
+## Verkefnislýsing
+
 Útfæra skal vefþjónustur fyrir sjónvarpsþáttavef:
 
 * Gefin eru/verða gögn fyrir sjónvarpsþætti, season og staka þætti sem flytja þarf inn í gagnagrunn
