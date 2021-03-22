@@ -1,11 +1,16 @@
 import multer from 'multer';
 import cloudinary from 'cloudinary';
 import xss from 'xss';
-import { isValid} from 'date-fns';
+import { isValid } from 'date-fns';
 import { query, pagedQuery } from '../utils/db.js';
 import { addPageMetadata } from '../utils/addPageMetadata.js';
-import { isInt, isNotEmptyString, isEmpty, lengthValidationError, isBoolean, isString } from '../utils/validation.js';
-
+import {
+  isInt,
+  isNotEmptyString,
+  isEmpty,
+  lengthValidationError,
+  isString,
+} from '../utils/validation.js';
 
 const MIMETYPES = [
   'image/jpeg',
@@ -17,20 +22,20 @@ async function findSeasons(id, number) {
   if (!isInt(id) && !isInt(number)) {
     return null;
   }
-  
+
   const seasons = await query(
     `SELECT
         id,name,air_date,overview,poster
       FROM
         seasons
       WHERE serie_id = $1 AND number = $2`,
-    [id,number],
+    [id, number],
   );
-  
+
   if (seasons.rows.length !== 1) {
     return null;
   }
-  
+
   return seasons.rows[0];
 }
 
@@ -38,27 +43,21 @@ async function findEpisodes(id, number) {
   if (!isInt(id) && !isInt(number)) {
     return null;
   }
-  
+
   const episodes = await query(
     `SELECT
         name,number,air_date,overview
       FROM
         episodes
       WHERE serie_id = $1 AND season = $2 ORDER BY number `,
-    [id,number],
+    [id, number],
   );
-  
-  if (episodes.rows.length == 0) {
+
+  if (episodes.rows.length === 0) {
     return null;
   }
-  
-  return episodes.rows;
-}
 
-async function deleteRow(id) {
-  const q = 'DELETE FROM seasons WHERE id = $1';
-  
-  return query(q, id);
+  return episodes.rows;
 }
 
 export async function listSeasons(req, res) {
@@ -88,25 +87,24 @@ export async function listSeason(req, res) {
   const { id, number } = req.params;
 
   const season = await findSeasons(id, number);
-  const episodes = await findEpisodes(id,number);
-  
+  const episodes = await findEpisodes(id, number);
+
   if (!season) {
     return res.status(404).json({ error: 'Season not found' });
   }
-  
+
   return res.json({
-    season: season,
-    episodes: episodes
+    season,
+    episodes,
   });
 }
-
 
 export async function deleteSeason(req, res) {
   const { id, number } = req.params;
 
   const q = 'DELETE FROM seasons WHERE serie_id = $1 AND number = $2';
 
-  await query(q, [id,number]);
+  await query(q, [id, number]);
 
   return res.json({});
 }
@@ -139,7 +137,6 @@ async function validateSeasons(
     name, number, airDate, overview, serie,
   } = {},
   patching = false,
-  id = null,
 ) {
   const validation = [];
   // Name validation
@@ -247,11 +244,12 @@ async function createSeasonsWithImage(req, res, next) {
       // Skilum áfram villu frá Cloudinary, ef einhver
       if (error.http_code && error.http_code === 400) {
         return res.status(400).json(
-          { errors: [{
-            field: 'image',
-            error: error.message,
-          }]
-          }
+          {
+            errors: [{
+              field: 'image',
+              error: error.message,
+            }],
+          },
         );
       }
 

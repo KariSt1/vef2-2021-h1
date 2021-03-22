@@ -1,10 +1,12 @@
 import multer from 'multer';
 import cloudinary from 'cloudinary';
 import xss from 'xss';
-import { parse, isValid, format } from 'date-fns';
+import { isValid } from 'date-fns';
 import { query, pagedQuery, conditionalUpdate } from '../utils/db.js';
 import { addPageMetadata } from '../utils/addPageMetadata.js';
-import { isInt, isNotEmptyString, isEmpty, lengthValidationError, isBoolean, isString } from '../utils/validation.js';
+import {
+  isInt, isNotEmptyString, isEmpty, lengthValidationError, isBoolean, isString,
+} from '../utils/validation.js';
 
 const MIMETYPES = [
   'image/jpeg',
@@ -26,7 +28,8 @@ async function findById(id) {
     LEFT JOIN users_tvshows ON tvshows.id = users_tvshows.tvshow_id
     WHERE tvshows.id = $1
     GROUP BY tvshows.id
-`, [id]);
+    `, [id],
+  );
 
   if (series.rows.length !== 1) {
     return null;
@@ -69,7 +72,7 @@ async function findGenres(id) {
   return genres.rows;
 }
 
-async function findIfRatingExists(user, id, rating,patching = false) {
+async function findIfRatingExists(user, id, rating, patching = false) {
   const validations = [];
   if (!isInt(id)) {
     return null;
@@ -81,20 +84,21 @@ async function findIfRatingExists(user, id, rating,patching = false) {
     FROM users_tvshows
     INNER JOIN users ON users.id = users_tvshows.user_id
     WHERE users_tvshows.user_id = $1 AND users_tvshows.tvshow_id = $2
-`, [user,id]);
+    `, [user, id],
+  );
 
   if (series.rows[0] !== undefined && series.rows[0].rating) {
     validations.push({
-      msg: `already exists`,
+      msg: 'already exists',
       param: 'id',
       location: 'params',
-  });
+    });
   }
 
   if (!patching || rating || isEmpty(rating)) {
     if (!isInt(rating) || rating < 0 || rating > 5) {
       validations.push({
-        msg: `rating must be an integer, one of 0, 1, 2, 3, 4, 5`,
+        msg: 'rating must be an integer, one of 0, 1, 2, 3, 4, 5',
         param: 'rating',
         location: 'body',
       });
@@ -104,13 +108,13 @@ async function findIfRatingExists(user, id, rating,patching = false) {
   return validations;
 }
 
-async function validateRating(rating,patching = false) {
+async function validateRating(rating, patching = false) {
   const validations = [];
 
   if (!patching || rating || isEmpty(rating)) {
     if (!isInt(rating) || rating < 0 || rating > 5) {
       validations.push({
-        msg: `rating must be an integer, one of 0, 1, 2, 3, 4, 5`,
+        msg: 'rating must be an integer, one of 0, 1, 2, 3, 4, 5',
         param: 'rating',
         location: 'body',
       });
@@ -131,10 +135,11 @@ async function findIfStateExists(user, id) {
     FROM users_tvshows
     INNER JOIN users ON users.id = users_tvshows.user_id
     WHERE users_tvshows.user_id = $1 AND users_tvshows.tvshow_id = $2
-`, [user,id]);
+    `, [user, id],
+  );
 
-  let errors = [];
- 
+  const errors = [];
+
   if (series.rows[0] !== undefined && series.rows[0].state) {
     errors.push({
       msg: 'already exists',
@@ -166,10 +171,9 @@ export async function listSeries(req, res) {
 
 async function validateSeries(
   {
-    name, airDate, inProduction, tagline, description, language, network, homepage
+    name, airDate, inProduction, tagline, description, language, network, homepage,
   } = {},
   patching = false,
-  id = null,
 ) {
   const validation = [];
   // Name validation
@@ -240,8 +244,8 @@ async function validateSeries(
     }
   }
 
-   // Language validation
-   if (!patching || language || isEmpty(language)) {
+  // Language validation
+  if (!patching || language || isEmpty(language)) {
     if (!isNotEmptyString(language, { min: 2, max: 2 })) {
       validation.push({
         msg: 'language must be a string of length 2',
@@ -301,7 +305,7 @@ async function withMulter(req, res, next, fn) {
 
 async function createSeriesWithImage(req, res, next) {
   const {
-    name, airDate, inProduction = null, tagline = null, image,
+    name, airDate, inProduction = null, tagline = null,
     description = null, language, network = null, homepage = null,
   } = req.body;
 
@@ -320,8 +324,8 @@ async function createSeriesWithImage(req, res, next) {
     if (!validateImageMimetype(mimetype)) {
       validations.push({
         field: 'image',
-        error: `Mimetype ${mimetype} is not legal. ` +
-               `Only ${MIMETYPES.join(', ')} are accepted`,
+        error: `Mimetype ${mimetype} is not legal. `
+               + `Only ${MIMETYPES.join(', ')} are accepted`,
       });
     }
   }
@@ -340,10 +344,12 @@ async function createSeriesWithImage(req, res, next) {
     } catch (error) {
       // Skilum áfram villu frá Cloudinary, ef einhver
       if (error.http_code && error.http_code === 400) {
-        return res.status(400).json({ errors: [{
-          field: 'image',
-          error: error.message,
-        }] });
+        return res.status(400).json({
+          errors: [{
+            field: 'image',
+            error: error.message,
+          }],
+        });
       }
 
       console.error('Unable to upload file to cloudinary');
@@ -377,7 +383,6 @@ async function createSeriesWithImage(req, res, next) {
     (series.network === null) ? series.network : xss(series.network),
     (series.network === null) ? series.homepage : xss(series.network),
   ];
-
 
   const result = await query(q, values);
 
@@ -413,8 +418,8 @@ async function updateSeriesWithImage(req, res, next) {
     if (!validateImageMimetype(mimetype)) {
       validations.push({
         field: 'image',
-        error: `Mimetype ${mimetype} is not legal. ` +
-               `Only ${MIMETYPES.join(', ')} are accepted`,
+        error: `Mimetype ${mimetype} is not legal. `
+               + `Only ${MIMETYPES.join(', ')} are accepted`,
       });
     }
   }
@@ -433,10 +438,12 @@ async function updateSeriesWithImage(req, res, next) {
     } catch (error) {
       // Skilum áfram villu frá Cloudinary, ef einhver
       if (error.http_code && error.http_code === 400) {
-        return res.status(400).json({ errors: [{
-          field: 'image',
-          error: error.message,
-        }] });
+        return res.status(400).json({
+          errors: [{
+            field: 'image',
+            error: error.message,
+          }],
+        });
       }
 
       console.error('Unable to upload file to cloudinary');
@@ -472,8 +479,8 @@ async function updateSeriesWithImage(req, res, next) {
     isString(series.description) ? xss(series.description) : null,
     isString(series.language) ? xss(series.language) : null,
     isString(series.network) ? xss(series.network) : null,
-    isString(series.homepage) ? xss(series.homepage) : null, 
-   ];
+    isString(series.homepage) ? xss(series.homepage) : null,
+  ];
 
   if (!fields.filter(Boolean).length === 0) {
     return res.status(400).json({ error: 'Nothing to update' });
@@ -488,13 +495,13 @@ async function updateSeriesWithImage(req, res, next) {
   return res.status(201).json(result.rows[0]);
 }
 
-export async function newSeries(req, res, next) {  
+export async function newSeries(req, res, next) {
   return withMulter(req, res, next, createSeriesWithImage);
 }
 
 export async function listSingleSeries(req, res) {
   const { id } = req.params;
-  
+
   const singleSeries = await findById(id);
   const seasons = await findSeasons(id);
   const genres = await findGenres(id);
@@ -505,14 +512,13 @@ export async function listSingleSeries(req, res) {
 
   return res.json({
     items: singleSeries,
-    genres: genres,
-    seasons: seasons
-});
+    genres,
+    seasons,
+  });
 }
 
 export async function updateSeries(req, res, next) {
   return withMulter(req, res, next, updateSeriesWithImage);
-
 }
 
 export async function deleteSeries(req, res) {
@@ -525,15 +531,12 @@ export async function deleteSeries(req, res) {
   return res.json({});
 }
 
-
 export async function newSeriesRating(req, res) {
   const { id } = req.params;
-  const  user  = req.user.id;
+  const user = req.user.id;
   const { rating } = req.body;
 
-  const validations = await findIfRatingExists(user,id,rating);
-
-
+  const validations = await findIfRatingExists(user, id, rating);
 
   if (validations.length > 0) {
     return res.status(400).json({
@@ -542,13 +545,13 @@ export async function newSeriesRating(req, res) {
   }
 
   const q = 'INSERT INTO users_tvshows (user_id,tvshow_id,rating) VALUES ($1,$2,$3) RETURNING user_id,rating,tvshow_id';
-  const result = await query(q, [xss(user),xss(id),xss(rating)]);
+  const result = await query(q, [xss(user), xss(id), xss(rating)]);
   return res.status(201).json(result.rows[0]);
 }
 
 export async function updateSeriesRating(req, res) {
   const { id } = req.params;
-  const  user  = req.user.id;
+  const user = req.user.id;
   const { rating } = req.body;
 
   const validations = await validateRating(rating);
@@ -560,14 +563,13 @@ export async function updateSeriesRating(req, res) {
   }
 
   const q = 'UPDATE users_tvshows SET rating = $1 WHERE tvshow_id = $2 AND user_id = $3 RETURNING user_id,rating,tvshow_id';
-  const result = await query(q, [rating,xss(id),xss(user)]);
+  const result = await query(q, [rating, xss(id), xss(user)]);
   return res.status(201).json(result.rows[0]);
-
 }
 
 export async function deleteSeriesRating(req, res) {
   const { id } = req.params;
-  const  user  = req.user.id;
+  const user = req.user.id;
 
   const series = await query(
     `SELECT
@@ -575,39 +577,38 @@ export async function deleteSeriesRating(req, res) {
     FROM users_tvshows
     INNER JOIN users ON users.id = users_tvshows.user_id
     WHERE users_tvshows.user_id = $1 AND users_tvshows.tvshow_id = $2`,
-    [user,id]
+    [user, id],
   );
   if (series.rows.length === 0 || series.rows[0].rating === null) {
     return res.status(400).json({
       errors: [
         {
-            "msg": "not found",
-            "param": "id",
-            "location": "params"
-        }
-    ]
+          msg: 'not found',
+          param: 'id',
+          location: 'params',
+        },
+      ],
     });
   }
 
   const q = 'DELETE FROM users_tvshows WHERE tvshow_id = $1 AND user_id = $2';
 
-  await query(q, [id,user]);
+  await query(q, [id, user]);
 
   return res.json({});
-
 }
 
 export async function newSeriesState(req, res) {
   const { id } = req.params;
-  const  user  = req.user.id;
+  const user = req.user.id;
   const { state } = req.body;
 
-  const errors = await findIfStateExists(user,id);
+  const errors = await findIfStateExists(user, id);
 
   if (state !== 'Langar að horfa' && state !== 'Er að horfa' && state !== 'Hef horft') {
     errors.push({
       value: state,
-      msg: 'state must be one of \"Langar að horfa\", \"Er að horfa\", \"Hef horft\"',
+      msg: 'state must be one of "Langar að horfa", "Er að horfa", "Hef horft"',
       param: 'state',
       location: 'body',
     });
@@ -615,29 +616,28 @@ export async function newSeriesState(req, res) {
 
   if (errors.length > 0) {
     return res.status(400).json({
-      errors
+      errors,
     });
   }
 
-    const q = 'INSERT INTO users_tvshows (user_id,tvshow_id,status) VALUES ($1,$2,$3) RETURNING user_id,status,tvshow_id';
-    const result = await query(q, [user,id,state]);
-    return res.status(201).json(result.rows[0]);
+  const q = 'INSERT INTO users_tvshows (user_id,tvshow_id,status) VALUES ($1,$2,$3) RETURNING user_id,status,tvshow_id';
+  const result = await query(q, [user, id, state]);
+  return res.status(201).json(result.rows[0]);
 }
 
 export async function updateSeriesState(req, res) {
   const { id } = req.params;
-  const  user  = req.user.id;
+  const user = req.user.id;
   const { status } = req.body;
 
   const q = 'UPDATE users_tvshows SET status = $1 WHERE tvshow_id = $2 AND user_id = $3 RETURNING user_id,status,tvshow_id';
-  const result = await query(q, [xss(status),xss(id),xss(user)]);
+  const result = await query(q, [xss(status), xss(id), xss(user)]);
   return res.status(201).json(result.rows[0]);
-
 }
 
 export async function deleteSeriesState(req, res) {
   const { id } = req.params;
-  const  user  = req.user.id;
+  const user = req.user.id;
 
   const series = await query(
     `SELECT
@@ -645,23 +645,23 @@ export async function deleteSeriesState(req, res) {
     FROM users_tvshows
     INNER JOIN users ON users.id = users_tvshows.user_id
     WHERE users_tvshows.user_id = $1 AND users_tvshows.tvshow_id = $2`,
-    [user,id]
+    [user, id],
   );
   if (series.rows.length === 0 || series.rows[0].status === null) {
     return res.status(400).json({
       errors: [
         {
-            "msg": "not found",
-            "param": "id",
-            "location": "params"
-        }
-    ]
+          msg: 'not found',
+          param: 'id',
+          location: 'params',
+        },
+      ],
     });
   }
 
   const q = 'DELETE FROM users_tvshows WHERE tvshow_id = $1 AND user_id = $2';
 
-  await query(q, [id,user]);
+  await query(q, [id, user]);
 
   return res.json({});
 }

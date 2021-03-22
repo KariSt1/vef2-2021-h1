@@ -1,15 +1,12 @@
-import express from'express';
+import express from 'express';
 import passport from 'passport';
-import jwt from'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { Strategy, ExtractJwt } from 'passport-jwt';
-import { 
-    findByUsername, 
-    validateUser, 
-    comparePasswords, 
-    findById, 
-    createUser, 
-    updateUser} from './users.js';
+import {
+  findByUsername, validateUser, comparePasswords,
+  findById, createUser,
+} from './users.js';
 
 import {
   isNotEmptyString,
@@ -23,7 +20,7 @@ dotenv.config();
 export const app = express();
 app.use(express.json());
 
-const defaultTokenLifetime = 60*60; 
+const defaultTokenLifetime = 60 * 60;
 
 const {
   JWT_SECRET: jwtSecret,
@@ -64,8 +61,8 @@ export function requireAuth(req, res, next) {
       }
 
       if (!user) {
-        const error = info && info.name === 'TokenExpiredError' ?
-          'expired token' : 'invalid token';
+        const error = info && info.name === 'TokenExpiredError'
+          ? 'expired token' : 'invalid token';
 
         return res.status(401).json({ error });
       }
@@ -87,8 +84,7 @@ export function checkUserIsAdmin(req, res, next) {
 async function registerRoute(req, res) {
   const { username, password, email } = req.body;
 
-  const validationMessage =
-    await validateUser({ username, password, email });
+  const validationMessage = await validateUser({ username, password, email });
 
   if (validationMessage.length > 0) {
     return res.status(400).json({ errors: validationMessage });
@@ -109,14 +105,14 @@ async function loginRoute(req, res) {
   if (!isNotEmptyString(username)) {
     validations.push({
       field: 'username',
-      error: 'Username is required. ' + lengthValidationError(username,1,256),
+      error: `Username is required. ${lengthValidationError(username, 1, 256)}`,
     });
   }
 
-  if (!isNotEmptyString(password, { min: 10} )) {
+  if (!isNotEmptyString(password, { min: 10 })) {
     validations.push({
       field: 'password',
-      error: 'Password is required. ' + lengthValidationError(password,10),
+      error: `Password is required. ${lengthValidationError(password, 10)}`,
     });
   }
 
@@ -130,8 +126,7 @@ async function loginRoute(req, res) {
     return res.status(401).json({ error: 'No such user' });
   }
 
-  const passwordIsCorrect =
-    await comparePasswords(password, user.password);
+  const passwordIsCorrect = await comparePasswords(password, user.password);
 
   if (passwordIsCorrect) {
     const payload = { id: user.id };
@@ -149,7 +144,6 @@ async function loginRoute(req, res) {
 
   return res.status(401).json({ error: 'Invalid password' });
 }
-
 
 app.post('/users/register', catchErrors(registerRoute));
 app.post('/users/login', catchErrors(loginRoute));
