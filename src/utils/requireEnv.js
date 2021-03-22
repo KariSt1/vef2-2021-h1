@@ -16,4 +16,4 @@ export function requireEnv(vars = []) {
     console.error(`${missing.join(', ')} vantar í umhverfi`);
     process.exit(1);
   }
-};
+}

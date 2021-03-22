@@ -14,7 +14,7 @@ export function isBoolean(b) {
   return typeof b === 'boolean';
 }
 
-export function lengthValidationError(s,min, max) {
+export function lengthValidationError(s, min, max) {
   const minMsg = min ? `at least ${min} characters` : '';
   const maxMsg = max ? `at most ${max} characters` : '';
   const msg = [minMsg, maxMsg].filter(Boolean).join(', ');

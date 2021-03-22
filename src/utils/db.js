@@ -42,8 +42,6 @@ export async function pagedQuery(
   values = [],
   { offset = 0, limit = 10 } = {},
 ) {
-  console.assert(Array.isArray(values), 'values should be an array');
-
   const sqlLimit = values.length + 1;
   const sqlOffset = values.length + 2;
   const q = `${sqlQuery} LIMIT $${sqlLimit} OFFSET $${sqlOffset}`;
@@ -80,7 +78,6 @@ export async function insertGenre(name) {
       SELECT name FROM GENRES WHERE name LIKE $1
     );
   `;
-  const values = { name };
 
   try {
     await query(q, [name]);
