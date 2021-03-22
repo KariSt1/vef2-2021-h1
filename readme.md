@@ -88,6 +88,17 @@ npm run dev
 
 * Stjórnandi með notandanafn `admin`, lykilorð `1234567890`
 * Ekki stjórnandi með notandanafn `nonni`, lykilorð `1234567890`
+    * Meðfylgjandi upplýsingar tengdar við notanda:
+        * Á series 1
+            * State: "Langar að horfa"
+            * Rating: 4
+        * Á series 2
+            * State: "Er að horfa"
+        * Á series 3
+            * State: "Hef horft"
+            * Rating: 3
+        * Á series 4
+            * Rating: 5
 
 ### Hópmeðlimir
 * Anna María Steingrímsdóttir
