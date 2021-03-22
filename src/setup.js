@@ -8,6 +8,7 @@ import { uploadImageIfNotUploaded } from './data/images.js';
 
 const schemaFile = './sql/schema.sql';
 const dropTablesFile = './sql/drop.sql';
+const insertUsersFile = './sql/insertUsers.sql';
 
 requireEnv(['DATABASE_URL', 'CLOUDINARY_URL']);
 
@@ -145,11 +146,22 @@ async function create() {
   await insertSeries();
   setTimeout(async () => {
     await insertSeasons();
+    // eslint-disable-next-line no-console
+    console.log('Seasons inserted');
   }, 9000);
   setTimeout(async () => {
     await insertEpisodes();
     await query("SELECT setval(pg_get_serial_sequence('tvshows', 'id'), 20, true)");
+    // eslint-disable-next-line no-console
+    console.log('Episodes inserted');
   }, 15000);
+  setTimeout(async () => {
+    const insertUsersData = await readFile(insertUsersFile);
+
+    await query(insertUsersData.toString('utf-8'));
+    // eslint-disable-next-line no-console
+    console.log('Users inserted');
+  }, 18000);
   console.info('Schema created');
 }
 
