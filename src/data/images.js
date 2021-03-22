@@ -1,9 +1,9 @@
+/* eslint-disable import/no-unresolved */
 import dotenv from 'dotenv';
 import util from 'util';
 import fs from 'fs';
 import path from 'path';
 import { v2 as cloudinary } from 'cloudinary';
-import multer from 'multer';
 import debug from '../utils/debug.js';
 
 const readDirAsync = util.promisify(fs.readdir);
@@ -25,31 +25,6 @@ if (!cloudinaryURL) {
   });
 }
 
-const MIMETYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-];
-
-
-async function withMulter(req, res, next, fn) {
-  multer({ dest: './temp' })
-    .single('image')(req, res, (err) => {
-      if (err) {
-        if (err.message === 'Unexpected field') {
-          const errors = [{
-            field: 'image',
-            error: 'Unable to read image',
-          }];
-          return res.status(400).json({ errors });
-        }
-
-        return next(err);
-      }
-
-      return fn(req, res, next).catch(next);
-    });
-}
 // Geymum í minni niðurstöður úr því að lista allar myndir frá Cloudinary
 let cachedListImages = null;
 
@@ -102,13 +77,13 @@ export async function uploadImagesFromDisk(imageDir) {
   const imagesFromDisk = await readDirAsync(imageDir);
 
   const filteredImages = imagesFromDisk
-    .filter(i => path.extname(i).toLowerCase() === '.jpg');
+    .filter((i) => path.extname(i).toLowerCase() === '.jpg');
 
   debug(`Bæti við ${filteredImages.length} myndum`);
 
   const images = [];
 
-  for (let i = 0; i < filteredImages.length; i++) {
+  for (let i = 0; i < filteredImages.length; i += 1) {
     const image = filteredImages[i];
     const imagePath = path.join(imageDir, image);
     const uploaded = await uploadImageIfNotUploaded(imagePath); // eslint-disable-line

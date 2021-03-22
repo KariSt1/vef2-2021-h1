@@ -4,9 +4,9 @@ import fastcsv from 'fast-csv';
 import fs from 'fs';
 // eslint-disable-next-line import/no-unresolved
 import { readFile } from 'fs/promises';
-import { query, end, insertGenre } from './utils/db.js';
+import { query, insertGenre } from './utils/db.js';
 import { requireEnv } from './utils/requireEnv.js';
-import { uploadImagesFromDisk, uploadImageIfNotUploaded } from './data/images.js';
+import { uploadImageIfNotUploaded } from './data/images.js';
 
 const schemaFile = './sql/schema.sql';
 const dropTablesFile = './sql/drop.sql';
@@ -14,24 +14,8 @@ const dropTablesFile = './sql/drop.sql';
 requireEnv(['DATABASE_URL', 'CLOUDINARY_URL']);
 
 const {
-  CLOUDINARY_URL: cloudinaryUrl,
   IMAGE_FOLDER: imageFolder = './data/img',
 } = process.env;
-
-async function main() {
-  console.info(`Set uppp tengingu við Cloudinary á ${cloudinaryUrl}`);
-
-  // Fylki með myndum og slóðum á Cloudinary
-  let images = [];
-
-  // senda myndir á Cloudinary
-  try {
-    images = await uploadImagesFromDisk(imageFolder);
-    console.info(`Sendi ${images.length} myndir á Cloudinary`);
-  } catch (e) {
-    console.error('Villa við senda myndir á Cloudinary:', e.message);
-  }
-}
 
 async function insertSeries() {
   const stream = fs.createReadStream('./data/series.csv');
@@ -53,7 +37,6 @@ async function insertSeries() {
         const seriesID = series[0];
         const genres = series[3].split(',');
         series.splice(3, 1);
-        //series.splice(0, 1);
         try {
           console.log(`Cloudinary byrjað fyrir ${imageFolder}/${series[5]}`);
           const image = await uploadImageIfNotUploaded(`${imageFolder}/${series[5]}`);
@@ -104,8 +87,7 @@ async function insertSeasons() {
           if (season[2] === '') {
             season.splice(2, 1);
             await query(seasonQueryEmptyDate, season);
-          }
-          else {
+          } else {
             await query(seasonQuery, season);
           }
         } catch (e) {
@@ -141,14 +123,12 @@ async function insertEpisodes() {
         try {
           const seasonResult = await query(selectSeasonIDQuery, [row[6], row[4]]);
           const seasonId = seasonResult.rows[0].id;
-          //row.splice(6, 1);
           row.splice(5, 1);
           row.push(seasonId);
           if (row[2] === '') {
             row.splice(2, 1);
             await query(episodeQueryEmptyDate, row);
-          }
-          else {
+          } else {
             await query(episodeQuery, row);
           }
         } catch (e) {
@@ -182,8 +162,6 @@ async function create() {
     await insertEpisodes();
     await query("SELECT setval(pg_get_serial_sequence('tvshows', 'id'), 20, true)");
   }, 15000);
-
-  //await end();
 
   console.info('Schema created');
 }
