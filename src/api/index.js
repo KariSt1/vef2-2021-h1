@@ -3,7 +3,6 @@ import { listSeason, listSeasons, deleteSeason, newSeasons } from './seasons.js'
 import { listEpisode, deleteEpisode, newEpisode } from './episode.js';
 import {
   listSeries,
-  listSingleSeries,
   newSeries,
   deleteSeries,
   updateSeries,
@@ -12,7 +11,8 @@ import {
   deleteSeriesRating,
   updateSeriesState,
   newSeriesState,
-  listSingleSeriesAuth
+  listSingleSeriesAuth,
+  deleteSeriesState
 } from './series.js';
 import { listGenres, newGenre } from './genres.js';
 import {
@@ -178,13 +178,12 @@ router.post('/tv/:id/rate', requireAuth, catchErrors(newSeriesRating));
 router.patch('/tv/:id/rate', requireAuth, catchErrors(updateSeriesRating));
 router.post('/tv/:id/state', requireAuth, catchErrors(newSeriesState));
 router.patch('/tv/:id/state', requireAuth, catchErrors(updateSeriesState));
-
 router.delete('/tv/:id/rate', requireAuth, catchErrors(deleteSeriesRating));
 router.patch('/tv/:id/state', requireAuth, catchErrors(updateSeriesState));
+router.delete('/tv/:id/state', requireAuth, catchErrors(deleteSeriesState));
 
 /*
 // Series
 // Series and users
-router.delete('/tv/:id/state', requireAuth, catchErrors(deleteSeriesState));
 router.get('/tv/:id', requireAuth, )
 */

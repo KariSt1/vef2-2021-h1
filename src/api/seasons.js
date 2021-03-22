@@ -200,14 +200,15 @@ async function validateSeasons(
   return validation;
 }
 
-async function createSeasonsWithImage(req, res, next, id) {
+async function createSeasonsWithImage(req, res, next) {
+  const { id } = req.params;
   if (!isInt(id)) {
     return null;
   }
 
   const {
     name, number, airDate = null, overview = null,
-    serie, serieId,
+    serie, serieId = id,
   } = req.body;
 
   // file er tómt ef engri var uploadað
@@ -259,7 +260,7 @@ async function createSeasonsWithImage(req, res, next, id) {
     }
 
     if (upload && upload.secure_url) {
-      seasons.image = upload.secure_url;
+      seasons.poster = upload.secure_url;
     } else {
       // Einhverja hluta vegna er ekkert `secure_url`?
       return next(new Error('Cloudinary upload missing secure_url'));
@@ -271,7 +272,7 @@ async function createSeasonsWithImage(req, res, next, id) {
       seasons
       (name, number, air_date, overview, poster, serie, serie_id)
     VALUES
-      ($1, $2, $3, $4, $5, $6)
+      ($1, $2, $3, $4, $5, $6, $7)
     RETURNING id, name, air_date, overview, poster, serie, serie_id
 `;
   const values = [
@@ -281,16 +282,14 @@ async function createSeasonsWithImage(req, res, next, id) {
     (seasons.overview === null) ? seasons.overview : xss(seasons.overview),
     xss(seasons.poster),
     xss(seasons.serie),
-    xss(seasons.serie_id),
+    xss(seasons.serieId),
   ];
 
-  const result = await query(q, [values, xss(id)]);
+  const result = await query(q, values);
 
   return res.status(201).json(result.rows[0]);
 }
 
 export async function newSeasons(req, res, next) {
-  const { id } = req.params;
-
-  return withMulter(req, res, next, createSeasonsWithImage, id);
+  return withMulter(req, res, next, createSeasonsWithImage);
 }
