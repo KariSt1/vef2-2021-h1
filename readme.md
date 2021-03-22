@@ -88,7 +88,6 @@ npm run dev
 
 * Stjórnandi með notandanafn `admin`, lykilorð `1234567890`
 * Ekki stjórnandi með notandanafn `nonni`, lykilorð `1234567890`
-  * Á pantanir og körfu
 
 ### Hópmeðlimir
 * Anna María Steingrímsdóttir
