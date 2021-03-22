@@ -9,8 +9,9 @@ import {
   updateSeries,
   newSeriesRating,
   updateSeriesRating,
+  deleteSeriesRating,
+  updateSeriesState,
   newSeriesState,
-  deleteSeriesRating
 } from './series.js';
 import { listGenres, newGenre } from './genres.js';
 import {
@@ -174,6 +175,7 @@ router.patch('/tv/:id/rate', requireAuth, catchErrors(updateSeriesRating));
 router.post('/tv/:id/state', requireAuth, catchErrors(newSeriesState));
 
 router.delete('/tv/:id/rate', requireAuth, catchErrors(deleteSeriesRating));
+router.patch('/tv/:id/state', requireAuth, catchErrors(updateSeriesState));
 
 
 /*
@@ -181,7 +183,7 @@ router.delete('/tv/:id/rate', requireAuth, catchErrors(deleteSeriesRating));
 
 
 // Series and users
-router.patch('/tv/:id/state', requireAuth, catchErrors(updateSeriesState));
+
 router.delete('/tv/:id/state', requireAuth, catchErrors(deleteSeriesState));
 router.get('/tv/:id', requireAuth, )
 */
