@@ -136,7 +136,7 @@ async function withMulter(req, res, next, fn) {
 
 async function validateSeasons(
   {
-    name, number, airDate, overview, serie
+    name, number, airDate, overview, serie,
   } = {},
   patching = false,
   id = null,
@@ -155,9 +155,9 @@ async function validateSeasons(
 
   // number validation
   if (!patching || number || isEmpty(number)) {
-    if (!isInt(number)) {
+    if (!isInt(number) || (number < 0) || (number > 5)) {
       validation.push({
-        msg: 'number must be an integer ',
+        msg: 'number must be an integer between 0 and 5',
         param: 'number',
         location: 'body',
       });

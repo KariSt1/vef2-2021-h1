@@ -78,7 +78,7 @@ async function findIfRatingExists(user, id) {
   const series = await query(
     `SELECT
       rating, user_id, tvshow_id
-    FROM users_tvshows 
+    FROM users_tvshows
     INNER JOIN users ON users.id = users_tvshows.user_id
     WHERE users_tvshows.user_id = $1 AND users_tvshows.tvshow_id = $2
 `, [user,id]);
@@ -89,6 +89,31 @@ async function findIfRatingExists(user, id) {
   }
 
   return validations;
+}
+
+async function findIfStateExists(user, id) {
+  if (!isInt(id)) {
+    return null;
+  }
+
+  const series = await query(
+    `SELECT
+      status, user_id, tvshow_id
+    FROM users_tvshows
+    INNER JOIN users ON users.id = users_tvshows.user_id
+    WHERE users_tvshows.user_id = $1 AND users_tvshows.tvshow_id = $2
+`, [user,id]);
+
+  let errors = [];
+  if (series.rows.length > 0) {
+    errors.push({
+      msg: 'already exists',
+      param: 'state',
+      location: 'body',
+    });
+  }
+
+  return errors;
 }
 
 export async function listSeries(req, res) {
@@ -519,7 +544,30 @@ export async function deleteSeriesRating(req, res) {
 }
 
 export async function newSeriesState(req, res) {
+  const { id } = req.params;
+  const  user  = req.user.id;
+  const { state } = req.body;
 
+  const errors = await findIfStateExists(user,id);
+
+  if (state !== 'Langar að horfa' && state !== 'Er að horfa' && state !== 'Hef horft') {
+    errors.push({
+      value: state,
+      msg: 'state must be one of \"Langar að horfa\", \"Er að horfa\", \"Hef horft\"',
+      param: 'state',
+      location: 'body',
+    });
+  }
+
+  if (errors.length > 0) {
+    return res.status(400).json({
+      errors
+    });
+  }
+
+    const q = 'INSERT INTO users_tvshows (user_id,tvshow_id,status) VALUES ($1,$2,$3) RETURNING user_id,status,tvshow_id';
+    const result = await query(q, [user,id,state]);
+    return res.status(201).json(result.rows[0]);
 }
 
 export async function updateSeriesState(req, res) {
