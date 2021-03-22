@@ -135,7 +135,7 @@ async function findIfStateExists(user, id) {
 
   let errors = [];
  
-  if (series.rows[0] !== undefined ) {
+  if (series.rows[0] !== undefined && series.rows[0].state) {
     errors.push({
       msg: 'already exists',
       param: 'state',
