@@ -76,6 +76,26 @@ export function requireAuth(req, res, next) {
   )(req, res, next);
 }
 
+export function optionalAuthentication(req, res, next) {
+  return passport.authenticate(
+    'jwt',
+    {session: false},
+    (err, user, info) => {
+      if (err) {
+        next(err);
+      }
+
+      if (!user) {
+        req.user = null;
+        return next();
+      }
+
+      req.user = user;
+      return next();
+    }
+  )(req, res, next);
+}
+
 export function checkUserIsAdmin(req, res, next) {
   if (req.user && req.user.admin) {
     return next();

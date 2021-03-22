@@ -12,6 +12,7 @@ import {
   deleteSeriesRating,
   updateSeriesState,
   newSeriesState,
+  listSingleSeriesAuth
 } from './series.js';
 import { listGenres, newGenre } from './genres.js';
 import {
@@ -21,7 +22,7 @@ import {
   currentUser,
   updateCurrentUser,
 } from './users.js';
-import { requireAuth, checkUserIsAdmin } from '../authentication/auth.js';
+import { requireAuth, checkUserIsAdmin, optionalAuthentication } from '../authentication/auth.js';
 import catchErrors from '../utils/catchErrors.js';
 
 const requireAdmin = [
@@ -155,7 +156,10 @@ router.patch('/users/:id', requireAdmin, catchErrors(updateUser));
 router.get('/tv', catchErrors(listSeries));
 router.post('/tv', requireAdmin, catchErrors(newSeries));
 router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
-router.get('/tv/:id', catchErrors(listSingleSeries));
+
+router.get('/tv/:id', optionalAuthentication, catchErrors(listSingleSeriesAuth));
+
+
 router.delete('/tv/:id', requireAdmin, catchErrors(deleteSeries));
 
 router.get('/tv/:id/season', catchErrors(listSeasons));
@@ -177,7 +181,6 @@ router.patch('/tv/:id/state', requireAuth, catchErrors(updateSeriesState));
 
 router.delete('/tv/:id/rate', requireAuth, catchErrors(deleteSeriesRating));
 router.patch('/tv/:id/state', requireAuth, catchErrors(updateSeriesState));
-
 
 /*
 // Series
