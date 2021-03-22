@@ -87,12 +87,14 @@ async function findIfRatingExists(user, id, rating, patching = false) {
     `, [user, id],
   );
 
-  if (series.rows[0] !== undefined && series.rows[0].rating) {
-    validations.push({
-      msg: 'already exists',
-      param: 'id',
-      location: 'params',
-    });
+  if (series.rows[0] !== undefined) {
+    if (series.rows[0].rating) {
+      validations.push({
+        msg: 'already exists',
+        param: 'id',
+        location: 'params',
+      });
+    }
   }
 
   if (!patching || rating || isEmpty(rating)) {
@@ -140,12 +142,14 @@ async function findIfStateExists(user, id) {
 
   const errors = [];
 
-  if (series.rows[0] !== undefined && series.rows[0].state) {
-    errors.push({
-      msg: 'already exists',
-      param: 'state',
-      location: 'body',
-    });
+  if (series.rows[0] !== undefined) {
+    if (series.rows[0].status) {
+      errors.push({
+        msg: 'already exists',
+        param: 'state',
+        location: 'body',
+      });
+    }
   }
 
   return errors;
@@ -499,24 +503,6 @@ export async function newSeries(req, res, next) {
   return withMulter(req, res, next, createSeriesWithImage);
 }
 
-export async function listSingleSeries(req, res) {
-  const { id } = req.params;
-
-  const singleSeries = await findById(id);
-  const seasons = await findSeasons(id);
-  const genres = await findGenres(id);
-
-  if (!singleSeries) {
-    return res.status(404).json({ error: 'Series not found' });
-  }
-
-  return res.json({
-    items: singleSeries,
-    genres,
-    seasons,
-  });
-}
-
 export async function updateSeries(req, res, next) {
   return withMulter(req, res, next, updateSeriesWithImage);
 }
@@ -664,4 +650,62 @@ export async function deleteSeriesState(req, res) {
   await query(q, [id, user]);
 
   return res.json({});
+}
+
+async function findByIdAuth(id) {
+  if (!isInt(id)) {
+    return null;
+  }
+
+  const series = await query(
+    `SELECT
+      tvshows.id,tvshows.name,tvshows.air_date,tvshows.inProduction,
+      tvshows.tagline,tvshows.image,tvshows.description,tvshows.language,
+      tvshows.network,tvshows.homepage, FLOOR(AVG(users_tvshows.rating)) AS averageRating, COUNT(users_tvshows.rating) AS ratingcount, 
+      FLOOR(users_tvshows.rating) as rating, users_tvshows.status
+    FROM tvshows
+    LEFT JOIN users_tvshows ON tvshows.id = users_tvshows.tvshow_id
+    WHERE tvshows.id = $1
+    GROUP BY tvshows.id, users_tvshows.rating,users_tvshows.status
+    `, [id],
+  );
+
+  if (series.rows.length < 0) {
+    return null;
+  }
+
+  return series.rows[0];
+}
+
+export async function listSingleSeriesAuth(req, res) {
+  const { id } = req.params;
+
+  if (req.user) {
+    const singleSeriesAuth = await findByIdAuth(id);
+    const seasons = await findSeasons(id);
+    const genres = await findGenres(id);
+
+    if (!singleSeriesAuth) {
+      return res.status(404).json({ error: 'Series not found' });
+    }
+
+    return res.json({
+      items: singleSeriesAuth,
+      genres,
+      seasons,
+    });
+  }
+  const singleSeries = await findById(id);
+  const seasons = await findSeasons(id);
+  const genres = await findGenres(id);
+
+  if (!singleSeries) {
+    return res.status(404).json({ error: 'Series not found' });
+  }
+
+  return res.json({
+    items: singleSeries,
+    genres,
+    seasons,
+  });
 }

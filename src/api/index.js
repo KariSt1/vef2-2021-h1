@@ -8,7 +8,6 @@ import {
 import { listEpisode, deleteEpisode, newEpisode } from './episode.js';
 import {
   listSeries,
-  listSingleSeries,
   newSeries,
   deleteSeries,
   updateSeries,
@@ -17,6 +16,7 @@ import {
   deleteSeriesRating,
   updateSeriesState,
   newSeriesState,
+  listSingleSeriesAuth,
   deleteSeriesState,
 } from './series.js';
 import { listGenres, newGenre } from './genres.js';
@@ -27,7 +27,7 @@ import {
   currentUser,
   updateCurrentUser,
 } from './users.js';
-import { requireAuth, checkUserIsAdmin } from '../authentication/auth.js';
+import { requireAuth, checkUserIsAdmin, optionalAuthentication } from '../authentication/auth.js';
 import catchErrors from '../utils/catchErrors.js';
 
 const requireAdmin = [
@@ -150,18 +150,17 @@ function indexRoute(req, res) {
 }
 
 router.get('/', indexRoute);
-
+// Users
 router.get('/users/me', requireAuth, catchErrors(currentUser));
 router.patch('/users/me', requireAuth, catchErrors(updateCurrentUser));
 router.get('/users', requireAdmin, catchErrors(listUsers));
 router.get('/users/:id', requireAdmin, catchErrors(listUser));
 router.patch('/users/:id', requireAdmin, catchErrors(updateUser));
-
 // Series
 router.get('/tv', catchErrors(listSeries));
 router.post('/tv', requireAdmin, catchErrors(newSeries));
 router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
-router.get('/tv/:id', catchErrors(listSingleSeries));
+router.get('/tv/:id', optionalAuthentication, catchErrors(listSingleSeriesAuth));
 router.delete('/tv/:id', requireAdmin, catchErrors(deleteSeries));
 // Seasons
 router.get('/tv/:id/season', catchErrors(listSeasons));
