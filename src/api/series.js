@@ -69,7 +69,7 @@ async function findGenres(id) {
   return genres.rows;
 }
 
-async function findIfRatingExists(user, id) {
+async function findIfRatingExists(user, id, method) {
   const validations = [];
   if (!isInt(id)) {
     return null;
@@ -84,8 +84,18 @@ async function findIfRatingExists(user, id) {
 `, [user,id]);
 
   if (series.rows.length > 0) {
-    const error = `Rating by this user already exists.`;
-    return [{ error }];
+    if (method === 'post') {
+      const error = `Rating by this user already exists.`;
+      return [{ error }];
+    }
+    if (method === 'delete') {
+      let errors = [];
+      errors.push({
+        msg: 'not found',
+        param: 'id',
+        location: 'params',
+      });
+    }
   }
 
   return validations;
