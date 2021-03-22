@@ -3,15 +3,20 @@ import { query, pagedQuery } from '../utils/db.js';
 import { addPageMetadata } from '../utils/addPageMetadata.js';
 import { isNotEmptyString, lengthValidationError } from '../utils/validation.js';
 
-async function validateGenre(name) {
-  if (!isNotEmptyString(name, { min: 1, max: 256 })) {
-    return [{
-      field: 'name',
-      error: lengthValidationError(name, 1, 256),
-    }];
+async function validateGenre(name, patching = false,
+  id = null,) {
+  const validation = [];
+  if (!patching || name || isEmpty(name)) {
+    if (!isNotEmptyString(name, { min: 1, max: 128 })) {
+      validation.push({
+        msg: `name is required ${lengthValidationError(name, 1, 128)}`,
+        param: 'name',
+        location: 'body',
+      });
+    }
   }
-
-  return [];
+  
+  return validation;
 }
 
 export async function listGenres(req, res) {
