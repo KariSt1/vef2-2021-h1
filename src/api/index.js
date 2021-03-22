@@ -12,11 +12,6 @@ import {
   deleteSeriesRating,
   updateSeriesState,
   newSeriesState,
-<<<<<<< HEAD
-  deleteSeriesRating,
-  updateSeriesState,
-=======
->>>>>>> 2b19673f50a595eaeba709107ebe77ab72471538
 } from './series.js';
 import { listGenres, newGenre } from './genres.js';
 import {

@@ -88,3 +88,4 @@ CREATE TABLE users_tvshows
 );
 
 INSERT INTO users (username, email,password,admin) VALUES ('admin','admin@admin.com','$2b$11$vDqeEn8TAMgzLhJatyVipuKrqsYB1bzkEeYnf/xb5ApYlVwJgIrtG','true');
+INSERT INTO users (username, email,password,admin) VALUES ('nonni','nonni@hotmail.com','$2b$11$vDqeEn8TAMgzLhJatyVipuKrqsYB1bzkEeYnf/xb5ApYlVwJgIrtG','false');

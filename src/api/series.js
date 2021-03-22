@@ -69,7 +69,7 @@ async function findGenres(id) {
   return genres.rows;
 }
 
-async function findIfRatingExists(user, id, method) {
+async function findIfRatingExists(user, id) {
   const validations = [];
   if (!isInt(id)) {
     return null;
@@ -84,18 +84,8 @@ async function findIfRatingExists(user, id, method) {
 `, [user,id]);
 
   if (series.rows.length > 0) {
-    if (method === 'post') {
-      const error = `Rating by this user already exists.`;
-      return [{ error }];
-    }
-    if (method === 'delete') {
-      let errors = [];
-      errors.push({
-        msg: 'not found',
-        param: 'id',
-        location: 'params',
-      });
-    }
+    const error = `Rating by this user already exists.`;
+    return [{ error }];
   }
 
   return validations;
@@ -517,7 +507,7 @@ export async function newSeriesRating(req, res) {
   const  user  = req.user.id;
   const { rating } = req.body;
   
-  const validations = await findIfRatingExists(user, id, 'post');
+  const validations = await findIfRatingExists(user, id);
 
   if (validations.length > 0) {
     return res.status(400).json({
@@ -545,11 +535,23 @@ export async function deleteSeriesRating(req, res) {
   const { id } = req.params;
   const  user  = req.user.id;
 
-  const errors = await findIfRatingExists(user, id, 'delete');
-
-  if (errors.length > 0) {
+  const series = await query(
+    `SELECT
+      rating, status, user_id, tvshow_id
+    FROM users_tvshows
+    INNER JOIN users ON users.id = users_tvshows.user_id
+    WHERE users_tvshows.user_id = $1 AND users_tvshows.tvshow_id = $2`,
+    [user,id]
+  );
+  if (series.rows.length === 0 || series.rows[0].rating === null) {
     return res.status(400).json({
-      errors: validations,
+      errors: [
+        {
+            "msg": "not found",
+            "param": "id",
+            "location": "params"
+        }
+    ]
     });
   }
 
