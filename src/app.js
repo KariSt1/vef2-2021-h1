@@ -3,7 +3,7 @@ import express from 'express';
 import { requireEnv } from './utils/requireEnv.js';
 import { router } from './api/index.js';
 import { app as userRouter } from './authentication/auth.js';
-import { cors } from './utils/cors.js'
+import { cors } from './utils/cors.js';
 
 dotenv.config();
 

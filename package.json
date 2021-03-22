@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon ./src/app.js",
     "start": "node ./src/app.js",
-    "eslint": "eslint *.js ./src/api ./src/authentication ./src/data ./src/utils",
+    "eslint": "eslint *.js ./src ./src/api ./src/authentication ./src/data ./src/utils",
     "test": "npm run eslint",
     "setup": "node ./src/setup.js"
   },

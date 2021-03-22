@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-/* eslint-disable import/no-unresolved */
 import fastcsv from 'fast-csv';
 import fs from 'fs';
 // eslint-disable-next-line import/no-unresolved
@@ -38,15 +36,10 @@ async function insertSeries() {
         const genres = series[3].split(',');
         series.splice(3, 1);
         try {
-          console.log(`Cloudinary byrjað fyrir ${imageFolder}/${series[5]}`);
           const image = await uploadImageIfNotUploaded(`${imageFolder}/${series[5]}`);
-          console.log('Cloudinary lokið');
           series[5] = image;
-          console.log('Serie query, id: ', seriesID);
           await query(seriesQuery, series);
-          console.log('Serie query búið');
           genres.forEach(async (genre) => {
-            console.log('Genre query');
             await insertGenre(genre);
             await query(linkQuery, [seriesID, genre]);
           });
@@ -79,10 +72,8 @@ async function insertSeasons() {
 
       csvData.forEach(async (row) => {
         const season = row;
-        console.log('Season query, season nr: ', row[1], ' serie id: ', row[6]);
         try {
           const image = await uploadImageIfNotUploaded(`${imageFolder}/${season[4]}`);
-          console.log('Cloudinary lokið');
           season[4] = image;
           if (season[2] === '') {
             season.splice(2, 1);
@@ -93,7 +84,6 @@ async function insertSeasons() {
         } catch (e) {
           console.error(e);
         }
-        console.log('Season query búið');
       });
     });
 
@@ -154,22 +144,15 @@ async function create() {
 
   await insertSeries();
   setTimeout(async () => {
-    console.log('Seasons');
     await insertSeasons();
   }, 9000);
   setTimeout(async () => {
-    console.log('Episodes');
     await insertEpisodes();
     await query("SELECT setval(pg_get_serial_sequence('tvshows', 'id'), 20, true)");
   }, 15000);
-
   console.info('Schema created');
 }
 
 create().catch((err) => {
   console.error('Error creating schema', err);
 });
-
-// main().catch((err) => {
-//   console.error(err);
-// });
