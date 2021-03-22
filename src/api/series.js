@@ -530,8 +530,13 @@ export async function newSeriesRating(req, res) {
   const { id } = req.params;
   const  user  = req.user.id;
   const { rating } = req.body;
+<<<<<<< HEAD
+  
+  const validations = await findIfRatingExists(user, id);
+=======
 
   const validations = await findIfRatingExists(user,id,rating);
+>>>>>>> aecf0ca30aeacc05b650fb0fd36f96f6a702c6ce
 
   if (validations.length > 0) {
     return res.status(400).json({
@@ -566,6 +571,26 @@ export async function updateSeriesRating(req, res) {
 export async function deleteSeriesRating(req, res) {
   const { id } = req.params;
   const  user  = req.user.id;
+
+  const series = await query(
+    `SELECT
+      rating, status, user_id, tvshow_id
+    FROM users_tvshows
+    INNER JOIN users ON users.id = users_tvshows.user_id
+    WHERE users_tvshows.user_id = $1 AND users_tvshows.tvshow_id = $2`,
+    [user,id]
+  );
+  if (series.rows.length === 0 || series.rows[0].rating === null) {
+    return res.status(400).json({
+      errors: [
+        {
+            "msg": "not found",
+            "param": "id",
+            "location": "params"
+        }
+    ]
+    });
+  }
 
   const q = 'DELETE FROM users_tvshows WHERE tvshow_id = $1 AND user_id = $2';
 

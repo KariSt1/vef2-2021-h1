@@ -173,6 +173,7 @@ router.post('/genres', requireAdmin, catchErrors(newGenre));
 router.post('/tv/:id/rate', requireAuth, catchErrors(newSeriesRating));
 router.patch('/tv/:id/rate', requireAuth, catchErrors(updateSeriesRating));
 router.post('/tv/:id/state', requireAuth, catchErrors(newSeriesState));
+router.patch('/tv/:id/state', requireAuth, catchErrors(updateSeriesState));
 
 router.delete('/tv/:id/rate', requireAuth, catchErrors(deleteSeriesRating));
 router.patch('/tv/:id/state', requireAuth, catchErrors(updateSeriesState));
@@ -181,7 +182,6 @@ router.patch('/tv/:id/state', requireAuth, catchErrors(updateSeriesState));
 /*
 // Series
 // Series and users
-
 router.delete('/tv/:id/state', requireAuth, catchErrors(deleteSeriesState));
 router.get('/tv/:id', requireAuth, )
 */
